@@ -144,9 +144,21 @@ def draw_hud_lower_right(
     clamped_norm = float(np.clip(angle_norm, -1.0, 1.0))
     bar_fill_w = int(clamped_norm * (bar_w // 2))
     if bar_fill_w > 0:
-        cv2.rectangle(frame, (center_tick_x, bar_y), (center_tick_x + bar_fill_w, bar_y + 12), accent_color, -1)
+        cv2.rectangle(
+            frame,
+            (center_tick_x, bar_y),
+            (center_tick_x + bar_fill_w, bar_y + 12),
+            accent_color,
+            -1,
+        )
     elif bar_fill_w < 0:
-        cv2.rectangle(frame, (center_tick_x + bar_fill_w, bar_y), (center_tick_x, bar_y + 12), accent_color, -1)
+        cv2.rectangle(
+            frame,
+            (center_tick_x + bar_fill_w, bar_y),
+            (center_tick_x, bar_y + 12),
+            accent_color,
+            -1,
+        )
 
     # Sub-footer info: gauge labels and confidence
     cv2.putText(
@@ -227,18 +239,29 @@ def draw_racing_trajectory_on_road(
 
     # Filter points within camera frame bounds
     valid_mask = (
-        (cam_int[:, 0] >= 0)
-        & (cam_int[:, 0] < w)
-        & (cam_int[:, 1] >= 0)
-        & (cam_int[:, 1] < h)
+        (cam_int[:, 0] >= 0) & (cam_int[:, 0] < w) & (cam_int[:, 1] >= 0) & (cam_int[:, 1] < h)
     )
     cam_valid = cam_int[valid_mask]
 
     if len(cam_valid) >= 2:
         # Dark shadow outline for contrast against light road
-        cv2.polylines(frame, [cam_valid], isClosed=False, color=(20, 24, 30), thickness=6, lineType=cv2.LINE_AA)
+        cv2.polylines(
+            frame,
+            [cam_valid],
+            isClosed=False,
+            color=(20, 24, 30),
+            thickness=6,
+            lineType=cv2.LINE_AA,
+        )
         # Main vibrant trajectory line
-        cv2.polylines(frame, [cam_valid], isClosed=False, color=accent_color, thickness=3, lineType=cv2.LINE_AA)
+        cv2.polylines(
+            frame,
+            [cam_valid],
+            isClosed=False,
+            color=accent_color,
+            thickness=3,
+            lineType=cv2.LINE_AA,
+        )
 
         # Lookahead apex target circle
         target_pt = (int(cam_valid[-1, 0]), int(cam_valid[-1, 1]))
@@ -270,7 +293,12 @@ def render_telemetry_video(
 
     num_frames_to_render = int(duration_s * target_fps)
     vid_df = vid_df.iloc[:num_frames_to_render]
-    logger.info("Rendering %d frames (%.1f seconds at %.1f FPS)...", len(vid_df), len(vid_df) / target_fps, target_fps)
+    logger.info(
+        "Rendering %d frames (%.1f seconds at %.1f FPS)...",
+        len(vid_df),
+        len(vid_df) / target_fps,
+        target_fps,
+    )
 
     cap = cv2.VideoCapture(str(video_path))
     native_fps = cap.get(cv2.CAP_PROP_FPS)

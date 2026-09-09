@@ -61,7 +61,6 @@ def test_track_geometry_estimator_transverse_straight():
     assert result.mode == "CROSSROAD_OR_PEDESTRIAN"
 
 
-
 def test_temporal_smoother_outlier_interpolation():
     """Verifies that low-confidence outliers are interpolated and filtered."""
     records = [

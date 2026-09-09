@@ -111,7 +111,9 @@ class TrackGeometryEstimator:
         # Build binary mask of the valid projected road area to discard outer gym floor
         mask_cam = np.zeros((frame_h, frame_w), dtype=np.uint8)
         cv2.fillPoly(mask_cam, [src_points.astype(np.int32)], (255,))
-        self._mask_bev = cv2.warpPerspective(mask_cam, self._homography_matrix, (self.bev_w, self.bev_h))
+        self._mask_bev = cv2.warpPerspective(
+            mask_cam, self._homography_matrix, (self.bev_w, self.bev_h)
+        )
 
         return self._homography_matrix, self._mask_bev
 
@@ -325,7 +327,9 @@ class TrackGeometryEstimator:
 
         steer_rad = np.arctan2(racing_dx, delta_y) * 1.25
         raw_racing_angle_deg = float(np.degrees(steer_rad))
-        clamped_deg = float(np.clip(raw_racing_angle_deg, -self.max_steering_deg, self.max_steering_deg))
+        clamped_deg = float(
+            np.clip(raw_racing_angle_deg, -self.max_steering_deg, self.max_steering_deg)
+        )
         normalized_angle = clamped_deg / self.max_steering_deg
 
         confidence = float(min(1.0, len(slices) / 10.0 * 1.1))

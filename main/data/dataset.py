@@ -127,8 +127,15 @@ class NXPCupDataset(Dataset):
             "image": image_tensor,
             "angle": torch.tensor(angle_norm, dtype=torch.float32),
             "angle_deg": torch.tensor(angle_deg, dtype=torch.float32),
+            "next_step_steer_deg": torch.tensor(angle_deg, dtype=torch.float32),
+            "next_step_steer_norm": torch.tensor(angle_norm, dtype=torch.float32),
+            "lateral_offset": torch.tensor(
+                float(rec.get("lateral_offset_px", 0.0)), dtype=torch.float32
+            ),
+            "curvature": torch.tensor(float(rec.get("curvature", 0.0)), dtype=torch.float32),
             "filename": rec["filename"],
             "class_name": rec.get("class_name", ""),
+            "section_id": rec.get("section_id", ""),
         }
 
 
@@ -138,13 +145,21 @@ def load_dataset_records(csv_path: str | Path) -> list[dict[str, Any]]:
     with open(csv_path, "r", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
-            angle_deg = float(row["angle_deg"])
-            angle_norm = float(row.get("angle_norm", angle_deg / 30.0))
+            # Prioritize next_step_steer_deg for centering control
+            if "next_step_steer_deg" in row and row["next_step_steer_deg"] != "":
+                angle_deg = float(row["next_step_steer_deg"])
+                angle_norm = float(row.get("next_step_steer_norm", angle_deg / 30.0))
+            else:
+                angle_deg = float(row["angle_deg"])
+                angle_norm = float(row.get("angle_norm", angle_deg / 30.0))
 
-            # If explicit class_name not in CSV, derive from angle for stratified sampling
+            # Derive class_name for stratified sampling
             class_name = row.get("class_name")
             if not class_name:
-                if angle_deg < -5.0:
+                mode = row.get("mode")
+                if mode:
+                    class_name = mode.lower()
+                elif angle_deg < -5.0:
                     class_name = "left_curve"
                 elif angle_deg > 5.0:
                     class_name = "right_curve"
@@ -156,7 +171,13 @@ def load_dataset_records(csv_path: str | Path) -> list[dict[str, Any]]:
                     "filename": row["filename"],
                     "angle_deg": angle_deg,
                     "angle_norm": angle_norm,
+                    "next_step_steer_deg": angle_deg,
+                    "next_step_steer_norm": angle_norm,
                     "class_name": class_name,
+                    "mode": row.get("mode", class_name.upper()),
+                    "section_id": row.get("section_id", ""),
+                    "lateral_offset_px": float(row.get("lateral_offset_px", 0.0)),
+                    "curvature": float(row.get("curvature", 0.0)),
                     "confidence": float(row.get("confidence", 1.0)),
                 }
             )

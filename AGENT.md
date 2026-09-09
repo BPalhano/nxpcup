@@ -104,32 +104,49 @@ Para garantir que o modelo seja **mais rápido e mais preciso** que a DAVE-2:
 
 ## 🛠️ Roteiro de Execução Autônoma do Agente (Sprints)
 
-### Sprint 1: Setup, Refatoração & DVC
-1. Criar `pyproject.toml` com dependências (`torch`, `torchvision`, `timm`, `albumentations`, `opencv-python-headless`, `onnx`, `onnxruntime`, `mlflow`, `dvc`, `evidently`, `fastapi`, `pytest`, `ruff`, `mypy`).
-2. Configurar `dvc init` no repositório e rastrear a pasta `recording_dataset/` e `main/data/processed/`.
-3. Refatorar o carregamento de dados em `src/data/dataset.py` lendo `labels.csv` e aplicando as transformações geométricas e de iluminação com Albumentations.
+### ✅ Sprint 0 & 1: Setup, Fundação de Dados & Labels Contínuos de Centralização (CONCLUÍDO)
+1. **Ambiente e Ferramental:** Configurado `pyproject.toml`, gerenciador `uv`, linters `ruff`, checagem estrita `mypy` e suite de testes `pytest`.
+2. **Dataset de Alta Resolução (`nxpcup_database`):** 
+   - 3.433 imagens RGB $200 \times 66$ extraídas determinísticamente a 10.0 FPS.
+   - Segmentação e isolamento por barreira multicue Canny + Black Top-Hat no plano da câmera e BEV.
+   - Formulação cinemática de próximo passo para centralização do kart ($\delta_{\text{next\_step}} \in [-30.0^\circ, +30.0^\circ]$ via Stanley + Pure Pursuit).
+   - Eliminação de fallbacks cegos de trapézio.
+3. **Importação e Validação em `nxpcup`:**
+   - Labels consolidados em `main/data/processed/labels_continuous.csv` e `segmented_labels.csv`.
+   - `main/data/dataset.py` parametrizado para carregar `next_step_steer_deg` como alvo principal de treinamento, com telemetria rica (`lateral_offset_px`, `curvature`, `section_id`, `track_width_px`).
+   - **10/10 testes unitários passando com 100% de sucesso** (`main/tests/test_dataset.py` e `test_auto_labeler.py`).
 
-### Sprint 2: Implementação dos 3 Modelos & Treinamento com MLflow
-1. Criar `src/models/dave2.py` e `src/models/palhano_cnn.py` transpondo o código original de `cnn_deepcar.py` para classes PyTorch limpas e tipadas.
-2. Criar `src/models/micro_vit.py` com a arquitetura híbrida de autoatenção.
-3. Criar script de treinamento unificado com suporte a **MLflow Autologging**, gravando curvas de treino, MAE e matriz de dispersão de ângulos reais vs. preditos.
+### ✅ Sprint 2: Implementação dos 3 Modelos & Treinamento com MLflow (CONCLUÍDO)
+1. **NVIDIA DAVE-2 Baseline (`main/src/models/dave2.py`):**
+   - 5 camadas convolucionais (3x 5x5 stride 2 + 2x 3x3 stride 1) e 5 camadas lineares (1152 -> 1164 -> 100 -> 50 -> 10 -> 1), totalizando 1.595.511 parâmetros.
+2. **PalhanoCNN Legado (`main/src/models/palhano_cnn.py`):**
+   - Transposição exata da arquitetura do paper ENSICAEN com 5 convoluções e 4 camadas densas (1152 -> 512 -> 256 -> 128 -> 1), totalizando **exatamente 886.037 parâmetros**.
+3. **MicroViT Proposto (`main/src/models/micro_vit.py`):**
+   - Stem convolucional de 2 estágios ($3 \times 3$, stride 2) reduzindo a $16 \times 50 \times 64$, seguido por patch embedding $2 \times 2$ (200 tokens), 2 blocos de Multi-Head Self-Attention ($d_{model}=128$, 4 heads, MLP=256) e GAP, totalizando **359.841 parâmetros** (dentro do budget de 350k-450k).
+4. **Factory Pattern & Utilitários (`main/src/models/factory.py`):**
+   - `ModelFactory.create()` dinâmico, contagem de parâmetros e cálculo de FLOPs.
+5. **Pipeline de Treinamento e Avaliação (`main/src/train.py`):**
+   - Suporte completo a Huber Loss, AdamW, Cosine Annealing LR, checkpointing do melhor modelo (`best_model.pt`), tracking com MLflow, curvas de aprendizado, scatter plot e distribuição de resíduos.
+6. **Qualidade & Testes:**
+   - **20/20 testes unitários passando com 100% de sucesso** (`main/tests/test_models.py`, `test_dataset.py`, `test_auto_labeler.py`).
+   - Linting via Ruff e checagem de tipos estrita via Mypy passando sem erros em 19 arquivos.
 
-### Sprint 3: Pipeline de Otimização Edge (ONNX & TensorRT INT8)
-1. Escrever `src/optimization/onnx_exporter.py` exportando os 3 modelos para ONNX com shapes dinâmicos e aplicando `onnxsim`.
-2. Escrever `src/optimization/trt_calibrator.py` implementando o `IInt8EntropyCalibrator2` que carrega 300 imagens reais do dataset para calibrar a escala INT8 sem distorcer as predições.
-3. Escrever `src/optimization/trt_compiler.py` compilando as engines FP16 e INT8.
-4. Escrever `src/inference/benchmark.py` medindo warm-up, latência (P50/P95/P99), FPS e gerando os gráficos em histograma e boxplot (evoluindo os gráficos da Fig. 2 do paper original!).
+### ⏳ Sprint 3: Pipeline de Otimização Edge (ONNX & TensorRT INT8) (EM ANDAMENTO)
+1. Escrever `main/src/optimization/onnx_exporter.py` exportando os modelos para ONNX com shapes dinâmicos e aplicando `onnxsim`.
+2. Escrever `main/src/optimization/trt_calibrator.py` implementando o `IInt8EntropyCalibrator2` com imagens reais do dataset.
+3. Escrever `main/src/optimization/trt_compiler.py` compilando as engines FP16 e INT8.
+4. Escrever `main/src/inference/benchmark.py` medindo warm-up, latência (P50/P95/P99), FPS e gerando os gráficos comparativos.
 
-### Sprint 4: Estudo de Data Drift com Evidently AI
+### ⏳ Sprint 4: Estudo de Data Drift com Evidently AI
 1. Separar o conjunto de teste em dois grupos de validação:
    * **Grupo A (Baseline):** Voltas em condições ideais de luz.
    * **Grupo B (Drift Condition):** Voltas com iluminação reduzida e sombras artificiais.
-2. Gerar relatório HTML via `src/monitoring/drift_report.py` demonstrando:
+2. Gerar relatório HTML via `main/src/monitoring/drift_report.py` demonstrando:
    * O drift estatístico das imagens de entrada.
-   * O comportamento comparativo: a DAVE-2 aumenta o erro em curvas sombreadas, enquanto o MicroViT mantém o erro baixo graças à atenção global.
+   * Resiliência do MicroViT em manter erro reduzido sob sombras e variações de pista.
 
-### Sprint 5: API de Esterçamento, Docker & README Final
-1. Implementar `src/api/app.py` com FastAPI (`POST /steer` recebendo imagem multipart ou base64 e devolvendo o ângulo predito e tempo de inferência em ms).
+### ⏳ Sprint 5: API de Esterçamento, Docker & README Final
+1. Implementar `main/src/api/app.py` com FastAPI (`POST /steer` recebendo imagem multipart ou base64 e devolvendo o ângulo predito e tempo de inferência em ms).
 2. Criar Dockerfile multi-stage com compilação enxuta.
 3. Construir um `README.md` espetacular com badges, diagramas de arquitetura e tabela comparativa consolidada.
 

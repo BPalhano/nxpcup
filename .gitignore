@@ -36,6 +36,8 @@ main/data/*.gif
 mlruns/
 mlartifacts/
 lightning_logs/
+main/runs/
+runs/
 
 # DVC local caches
 .dvc/cache/
