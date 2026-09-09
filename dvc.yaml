@@ -1,0 +1,12 @@
+# 🏎️ NXP Cup DVC Data Pipeline Definition
+stages:
+  prepare_data:
+    cmd: python main/data/prepare_data.py
+    deps:
+      - main/data/prepare_data.py
+      - main/deep_learning/labels.csv
+      - main/deep_learning/resized_img_road
+    outs:
+      - main/data/processed/labels_clean.csv
+      - main/data/processed/images:
+          cache: false

@@ -1,0 +1,57 @@
+# Environments
+.venv/
+venv/
+ENV/
+env/
+main/tf/
+
+# Python & Caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+dist/
+build/
+main/data/processed/images/
+main/data/extracted_frames/
+main/data/qc_samples/
+main/data/*.mp4
+main/data/*.gif
+
+# Deep Learning weights, checkpoints and engines
+*.h5
+*.pth
+*.pt
+*.onnx
+*.engine
+*.plan
+*.trt
+
+# MLflow & Experiments
+mlruns/
+mlartifacts/
+lightning_logs/
+
+# DVC local caches
+.dvc/cache/
+.dvc/tmp/
+
+# OS and temp files
+.DS_Store
+Thumbs.db
+*Zone.Identifier
+*.tmp
+
+# Raw heavy video datasets (tracked via DVC)
+recording_dataset/*.mp4
+/recording_dataset
+main/traitement_image/dataset_video/
+main/traitement_image/dataset_pre_traitement/
+main/traitement_image/dataset_post_traitement/
+*.mp4
+*.avi

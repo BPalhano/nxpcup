@@ -1,0 +1,6 @@
+outs:
+- md5: a11192ea2931f7959ebdac370a787914.dir
+  size: 8476686
+  nfiles: 3286
+  hash: md5
+  path: resized_img_road

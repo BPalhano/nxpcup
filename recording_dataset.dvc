@@ -1,0 +1,6 @@
+outs:
+- md5: 9548195d7fcc0dc24e5304d2d915ce9f.dir
+  size: 354443182
+  nfiles: 17
+  hash: md5
+  path: recording_dataset

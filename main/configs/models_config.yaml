@@ -1,0 +1,26 @@
+# 🏎️ NXP Cup Model Architectures Configuration
+
+dave2:
+  name: "dave2"
+  input_shape: [3, 66, 200]
+  dropout: 0.5
+  output_dim: 1
+
+palhano_cnn:
+  name: "palhano_cnn"
+  input_shape: [3, 66, 200]
+  dropout: 0.5
+  output_dim: 1
+
+micro_vit:
+  name: "micro_vit"
+  input_shape: [3, 66, 200]
+  stem_channels: [32, 64]
+  patch_size: [2, 2]
+  embed_dim: 128
+  depth: 3
+  num_heads: 4
+  mlp_ratio: 2.0
+  dropout: 0.1
+  attention_dropout: 0.1
+  output_dim: 1

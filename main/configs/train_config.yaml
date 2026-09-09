@@ -1,0 +1,33 @@
+# 🏎️ NXP Cup Training & Optimization Configuration
+
+dataset:
+  data_dir: "main/data/processed/images"
+  csv_path: "main/data/processed/labels_continuous.csv"
+  image_height: 66
+  image_width: 200
+  train_split: 0.70
+  val_split: 0.15
+  test_split: 0.15
+  seed: 42
+
+training:
+  batch_size: 64
+  num_workers: 4
+  epochs: 35
+  learning_rate: 0.0003
+  min_lr: 0.00001
+  weight_decay: 0.0001
+  loss: "huber"         # Smooth L1 / Huber Loss (delta = 0.1)
+  huber_delta: 0.1
+  scheduler: "cosine"   # Cosine Annealing Learning Rate
+  early_stopping_patience: 8
+
+augmentation:
+  random_brightness_contrast_p: 0.5
+  random_shadow_p: 0.4
+  horizontal_flip_p: 0.5  # Automatic angle inversion (-angle)
+  shift_scale_rotate_p: 0.3
+
+mlflow:
+  experiment_name: "nxpcup_autonomous_driving"
+  tracking_uri: "file:./mlruns"
