@@ -1,0 +1,18 @@
+{
+  "model": "dave2",
+  "best_epoch": 48,
+  "best_val_mae_deg": 4.970724105834961,
+  "test_metrics": {
+    "mae_norm": 0.1715988963842392,
+    "rmse_norm": 0.30412259697914124,
+    "mae_deg": 5.1479668617248535,
+    "rmse_deg": 9.123677253723145,
+    "max_err_deg": 52.101806640625,
+    "r2": 0.7108356413327901
+  },
+  "parameters": {
+    "total": 1595511,
+    "trainable": 1595511
+  },
+  "timestamp": "20260910_094433"
+}

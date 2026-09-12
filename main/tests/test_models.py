@@ -103,8 +103,8 @@ def test_onnx_export_compatibility(model_name: str) -> None:
 
     torch.onnx.export(
         model,
-        dummy_input,
-        buffer,
+        (dummy_input,),
+        buffer,  # type: ignore[arg-type]
         input_names=["input_tensor"],
         output_names=["steering_angle"],
         dynamic_axes={"input_tensor": {0: "batch_size"}, "steering_angle": {0: "batch_size"}},

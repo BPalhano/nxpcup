@@ -131,13 +131,25 @@ Para garantir que o modelo seja **mais rápido e mais preciso** que a DAVE-2:
    - **20/20 testes unitários passando com 100% de sucesso** (`main/tests/test_models.py`, `test_dataset.py`, `test_auto_labeler.py`).
    - Linting via Ruff e checagem de tipos estrita via Mypy passando sem erros em 19 arquivos.
 
-### ⏳ Sprint 3: Pipeline de Otimização Edge (ONNX & TensorRT INT8) (EM ANDAMENTO)
-1. Escrever `main/src/optimization/onnx_exporter.py` exportando os modelos para ONNX com shapes dinâmicos e aplicando `onnxsim`.
-2. Escrever `main/src/optimization/trt_calibrator.py` implementando o `IInt8EntropyCalibrator2` com imagens reais do dataset.
-3. Escrever `main/src/optimization/trt_compiler.py` compilando as engines FP16 e INT8.
-4. Escrever `main/src/inference/benchmark.py` medindo warm-up, latência (P50/P95/P99), FPS e gerando os gráficos comparativos.
+### ✅ Sprint 3: Pipeline de Otimização Edge (ONNX & TensorRT INT8) (CONCLUÍDO)
+1. **Exportação ONNX Dinâmica e Otimização (`main/src/optimization/onnx_exporter.py`):**
+   - Exportação dos modelos PyTorch para ONNX com dimensão dinâmica de lote (`batch_size`), simplificação de grafo com `onnxsim` e validação com `onnx.checker`.
+   - Verificação rigorosa de paridade numérica absoluta ($< 10^{-7}$) entre tensores PyTorch e ONNX Runtime.
+   - Artefatos gerados: `micro_vit.onnx` (1.39 MB), `palhano_cnn.onnx` (3.38 MB), `dave2.onnx` (6.09 MB).
+2. **Calibração INT8 TensorRT (`main/src/optimization/trt_calibrator.py`):**
+   - Implementação de `NXPTrackCalibrator` baseada no `IInt8EntropyCalibrator2` do TensorRT, consumindo 512 frames reais pré-processados da pista em memória contígua e persistindo o cache de quantização (`calibration.cache`).
+3. **Compilador TensorRT com Fallback Graceful (`main/src/optimization/trt_compiler.py`):**
+   - Geração de planos de execução FP16 e INT8 PTQ para aceleradores NVIDIA e fallback automático transparente para CPU via ONNX Runtime.
+4. **Strategy Pattern de Inferência (`main/src/inference/strategy.py`):**
+   - Implementação do Strategy Pattern com `PyTorchInferenceStrategy`, `ONNXRuntimeInferenceStrategy` e `TensorRTInferenceStrategy`, desacoplando o código de inferência da aplicação do backend físico.
+5. **Benchmark Rigoroso de Borda (`main/src/inference/benchmark.py`):**
+   - Medição estatística (50 warmups, 300 iterações com `perf_counter_ns`), registrando P50, P95, P99, Throughput (FPS) e salvando relatórios em `main/training_results/`.
+   - **Destaque:** `MicroViT` alcançou **Test MAE de 5.66°** (redução de 41% com 50 épocas, superando os 6.43° do paper `palhano_cnn`), operando a **2.16 ms P50 e 436.7 FPS** no ONNX Runtime.
+6. **Qualidade & Testes:**
+   - **26/26 testes unitários passando com 100% de sucesso** (`test_onnx.py`, `test_models.py`, `test_dataset.py`, `test_auto_labeler.py`).
+   - Linting `ruff` e tipagem estrita `mypy` 100% aprovados.
 
-### ⏳ Sprint 4: Estudo de Data Drift com Evidently AI
+### ⏳ Sprint 4: Estudo de Data Drift com Evidently AI (EM ANDAMENTO)
 1. Separar o conjunto de teste em dois grupos de validação:
    * **Grupo A (Baseline):** Voltas em condições ideais de luz.
    * **Grupo B (Drift Condition):** Voltas com iluminação reduzida e sombras artificiais.

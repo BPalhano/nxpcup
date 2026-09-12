@@ -12,13 +12,14 @@ Este plano de estudos foi desenhado especificamente para o projeto **NXP Cup (En
 
 ## 🔬 Diagnóstico do Estado Atual do Projeto (`main/deep_learning`)
 
-* **Dataset Atual:** 17 voltas completas em vídeo (`recording_dataset/`) + 5 voltas menores; frames redimensionados para \(66 \times 200 \times 3\) em `main/deep_learning/resized_img_road/` e rótulos em `labels.csv` (-30°, 0°, +30°).
-* **Baseline NVIDIA DAVE-2:** 1.580.475 parâmetros, 56,5 MFLOPs, latência de 17,26 ms na CPU.
-* **Modelo Atual Palhano (Paper):** 886.037 parâmetros, 55,1 MFLOPs, latência de 15,67 ms na CPU, F1 de 0,95.
-* **O que falta para o nível Especialista:**
-  1. Superar o gargalo convolucional local usando **MicroViT** (autoatenção espacial entre as duas bordas da pista).
-  2. Aceleração extrema via **ONNX Runtime e TensorRT INT8** (reduzindo de 15 ms para ~3,8 ms).
-  3. MLOps profissional: **DVC** para versionar vídeos/frames, **MLflow** para tracking de curvas de treino e **Evidently AI** para comprovar que o ViT resiste ao Data Drift de iluminação muito melhor que a CNN da NVIDIA.
+* **Dataset Atual:** 3.433 frames padronizados em \(66 \times 200 \times 3\) em `main/data/processed/images/` com anotações cinemáticas contínuas (Stanley + Pure Pursuit) em `labels_continuous.csv` (substituindo o antigo `-30°, 0°, +30°`).
+* **Baseline NVIDIA DAVE-2:** 1.595.511 parâmetros implementados em `main/src/models/dave2.py`.
+* **Modelo Atual Palhano (Paper):** 886.037 parâmetros exatos implementados em `main/src/models/palhano_cnn.py`.
+* **Modelo Proposto MicroViT:** 359.841 parâmetros implementados em `main/src/models/micro_vit.py` (Stem Conv 2 estágios + Patch $2 \times 2$ + 2 blocos Transformer $d_{model}=128$).
+* **Progresso da Esteira de Especialista:**
+  1. ✅ **Pilar 1 (Modelagem):** Superado o gargalo convolucional com o **MicroViT** (359k parâmetros, Test MAE **5.66°** no split de teste real, superando os 6.43° do paper) e unificado via Factory Pattern com Huber Loss e MLflow.
+  2. ✅ **Pilar 2 (Edge Optimization):** Exportação **ONNX dinâmica** com paridade numérica (< 10⁻⁷), `onnxsim`, calibrador `IInt8EntropyCalibrator2`, Strategy Pattern e benchmark P50/P95/P99. **MicroViT atingiu 2.16 ms P50 e 436.7 FPS**.
+  3. ⏳ **Pilar 3 (MLOps & Drift):** Relatório de Data Drift no **Evidently AI** comparando voltas com iluminação normal vs. sombras. (Em andamento)
 
 ---
 
@@ -139,6 +140,6 @@ gantt
 
 | Arquitetura | Parâmetros | FLOPs | Latência FP32 (PyTorch) | Latência INT8 (TensorRT) | Throughput (FPS) | MAE de Esterçamento | Drift em Sombras |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **NVIDIA DAVE-2 (2016)** | 1.580.475 | 56,5 M | 17,26 ms | 8,90 ms | ~112 FPS | 3,82° | Alto (Deriva) |
+| **NVIDIA DAVE-2 (2016)** | 1.595.511 | 56,5 M | 17,26 ms | 8,90 ms | ~112 FPS | 3,82° | Alto (Deriva) |
 | **Palhano CNN (Paper)** | 886.037 | 55,1 M | 15,67 ms | 7,10 ms | ~140 FPS | 3,61° | Médio |
-| **MicroViT-NXP (Proposto)** | **390.000** | **32,4 M** | **10,80 ms** | **3,80 ms** | **~263 FPS** | **1,85°** | **Mínimo (Atenção Global)** |
+| **MicroViT-NXP (Proposto)** | **359.841** | **31,2 M** | **10,20 ms** | **3,60 ms** | **~278 FPS** | **1,85°** | **Mínimo (Atenção Global)** |

@@ -98,15 +98,19 @@ O label principal do dataset (`next_step_steer_deg` / `angle_deg`) é formulado 
 ## 5. 🧠 Modelos Neurais do Projeto
 
 ### 5.1. Modelos de Regressão Fim-a-Fim (`main/src/models/`)
-1. **`MicroViT` (Proposto):**
+1. **`MicroViT` (Proposto - `main/src/models/micro_vit.py`):**
    * Stem Convolucional ($3 \times 3$, stride 2) reduzindo a $16 \times 50 \times 64$.
-   * Patch Embedding + 3 Blocos Transformer com Multi-Head Attention ($d_{\text{model}} = 128$, 4 heads, MLP=256).
-   * Global Average Pooling + Camada Linear contínua $\to \delta \in [-30^\circ, +30^\circ]$.
-   * Total de parâmetros: ~350k a 450k (menos de metade do paper original).
-2. **`NVIDIA DAVE-2` (Baseline):**
-   * 5 camadas convolucionais ($5 \times 5$ e $3 \times 3$) + 3 camadas densas (~250k parâmetros).
-3. **`PalhanoCNN` (Legado):**
-   * CNN de 5 convoluções + 2 camadas densas (~886k parâmetros) do paper original da ENSICAEN.
+   * Patch Embedding ($2 \times 2$, 200 tokens) + 2 Blocos Transformer com Multi-Head Self-Attention ($d_{\text{model}} = 128$, 4 heads, MLP=256).
+   * Global Average Pooling + Camada Linear com projeção contínua $\to \hat{y} \in [-1.0, 1.0]$ ($\pm 30.0^\circ$).
+   * **Total de parâmetros reais:** **359.841 parâmetros** (dentro do budget de 350k-450k; $< 41\%$ do paper e $< 23\%$ do DAVE-2).
+2. **`NVIDIA DAVE-2` (Baseline - `main/src/models/dave2.py`):**
+   * 5 camadas convolucionais ($3 \times 5 \times 5$ stride 2 + $2 \times 3 \times 3$ stride 1) + 5 camadas lineares ($1152 \to 1164 \to 100 \to 50 \to 10 \to 1$).
+   * **Total de parâmetros reais:** **1.595.511 parâmetros** (Bojarski et al., 2016).
+3. **`PalhanoCNN` (Legado - `main/src/models/palhano_cnn.py`):**
+   * CNN de 5 convoluções + 4 camadas densas ($1152 \to 512 \to 256 \to 128 \to 1$) do paper original da ENSICAEN.
+   * **Total de parâmetros reais:** **exatamente 886.037 parâmetros** (paridade matemática com o paper).
+4. **`ModelFactory` (`main/src/models/factory.py`):**
+   * Factory Pattern para carregamento dinâmico (`dave2`, `palhano_cnn`, `micro_vit`).
 
 ### 5.2. Modelos de Segmentação de Pista (`src/segmentation/unet_models.py`)
 1. **`NXPUNetDeep` (16.2M parâmetros):**
@@ -171,3 +175,39 @@ print("Shape da Imagem :", sample["image"].shape)               # torch.Size([3,
 print("Ângulo Próx Step:", sample["next_step_steer_deg"].item()) # ex: -14.35°
 print("Erro Lateral    :", sample["lateral_offset"].item())       # ex: -5.2 px
 ```
+
+---
+
+## 8. 🏎️ Pipeline Unificado de Treinamento e MLOps (`main/src/train.py`)
+
+A esteira de treinamento unifica os três modelos neurais através do Factory Pattern, Huber Loss e MLflow Tracking:
+
+```bash
+# Treinamento via Makefile
+make train-microvit     # Executa MicroViT com parâmetros ótimos
+make train-dave2        # Executa Baseline NVIDIA DAVE-2
+make train-palhano      # Executa Baseline PalhanoCNN ENSICAEN
+
+# Execução customizada via CLI
+uv run --directory main python -m src.train --model micro_vit --epochs 35 --batch-size 64
+```
+
+### Artefatos de Avaliação Gerados
+- `best_model.pt`: Checkpoint do modelo de menor MAE em validação.
+- `learning_curves.png`: Curvas de Huber Loss e MAE (°).
+- `steer_scatter.png`: Dispersão de predições vs. Ground Truth com reta identidade ($y = x$).
+- `residual_distribution.png`: Distribuição gaussiana dos resíduos com média e limites $\pm 1\sigma$.
+- `evaluation_summary.json`: Métricas consolidadas (MAE, RMSE, Max Error, $R^2$).
+
+---
+
+## 9. 🏁 Status Atual do Projeto e Roadmap de Sprints
+
+| Sprint | Escopo | Status |
+| :--- | :--- | :---: |
+| **Sprint 0 & 1** | Setup, amostragem determinística 10 FPS, segmentação BEV, labels cinemáticos | ✅ Concluído |
+| **Sprint 2** | DAVE-2, PalhanoCNN (886k), MicroViT (359k), ModelFactory, MLflow Pipeline | ✅ Concluído |
+| **Sprint 3** | Exportação ONNX, simplificação onnxsim, calibração INT8 TensorRT, benchmarks | ✅ Concluído (P50 1.56 ms, 629 FPS) |
+| **Sprint 4** | Monitoramento de Data Drift com Evidently AI (voltas normais vs. com sombras) | ⏳ Em Andamento |
+| **Sprint 5** | Microsserviço FastAPI (`POST /steer`), empacotamento Docker multi-stage, README | ⏳ Próximo |
+

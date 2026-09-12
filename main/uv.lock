@@ -1779,6 +1779,7 @@ dependencies = [
     { name = "onnx" },
     { name = "onnxruntime" },
     { name = "onnxscript" },
+    { name = "onnxsim" },
     { name = "opencv-python-headless" },
     { name = "pandas" },
     { name = "pillow" },
@@ -1805,6 +1806,7 @@ requires-dist = [
     { name = "onnx", specifier = ">=1.15.0" },
     { name = "onnxruntime", specifier = ">=1.17.0" },
     { name = "onnxscript", specifier = ">=0.7.2" },
+    { name = "onnxsim", specifier = ">=0.7.3" },
     { name = "opencv-python-headless", specifier = ">=4.8.0" },
     { name = "pandas", specifier = ">=2.0.0" },
     { name = "pillow", specifier = ">=10.0.0" },
@@ -1900,6 +1902,26 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/0a/01/3e3fab8d643ca097ea4aa9e51246643699dfaaa0650589744fe44bc46651/onnxscript-0.7.2.tar.gz", hash = "sha256:2c664f6383d10f332a4d47b2876dcab16dba84909fe703656b19abc281fda165", size = 646719, upload-time = "2026-09-09T17:06:44.567Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b9/3b/06260997cdc41138e58718588a6c87d0eb342bbe0dda8a6aae91d163c384/onnxscript-0.7.2-py3-none-any.whl", hash = "sha256:d0e7121c6a1eefd608058928e111cbdb76709f70d269ff0d07aee493bd1d13c9", size = 754215, upload-time = "2026-09-09T17:06:46.442Z" },
+]
+
+[[package]]
+name = "onnxsim"
+version = "0.7.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "onnx" },
+    { name = "rich" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/25/ff/4e1729128c9b97914e446011903ce76bc8df81d27456ef7161f7713455a7/onnxsim-0.7.3.tar.gz", hash = "sha256:be0f2563d12ec4320b1f4e5866c14507039ed607a83982b12da531faa7405493", size = 3221256, upload-time = "2026-08-12T12:53:42.474Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/14/7c/2a9a7e17563e1aa774d92c067eee7a888cc5aef69e593f47f85c7af3fd26/onnxsim-0.7.3-cp311-cp311-macosx_13_0_arm64.whl", hash = "sha256:cb5cdc819b02ca3f33cf95642db19e33cf25057580f9649e37fc64adec1f27dc", size = 2937915, upload-time = "2026-08-12T12:53:28.89Z" },
+    { url = "https://files.pythonhosted.org/packages/9c/2a/194ad72be3f83455aed729b298aaf83af6b179ab359d9ee28bc21db9a165/onnxsim-0.7.3-cp311-cp311-manylinux_2_26_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:ddafbf9c9414a67d16ac9ae5bdb3a1c6883577d120bfd7f08acdab41360fc886", size = 2851090, upload-time = "2026-08-12T12:53:30.243Z" },
+    { url = "https://files.pythonhosted.org/packages/d7/e8/c49c79c0d9f5487a07fba25f9dbbac535eacd79208b7a0710ad63cd4a3c5/onnxsim-0.7.3-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:231b14bad548b1fcc1c9d6ab234f2964d74321aed2226cc279a91dcea98b9ced", size = 3178633, upload-time = "2026-08-12T12:53:31.863Z" },
+    { url = "https://files.pythonhosted.org/packages/e3/9c/0fcc00310fea6ca0b0a1deed00fecdc8574bd399a170af5bb5602bd76b8b/onnxsim-0.7.3-cp311-cp311-win_amd64.whl", hash = "sha256:644c8a3cb5557729a9f29efa4993530173a523a99cc2c5b8796b8db40b94d8b2", size = 3433646, upload-time = "2026-08-12T12:53:33.385Z" },
+    { url = "https://files.pythonhosted.org/packages/21/a3/61211903e677f0f4d1d137db6c5cb1f836fd5363bd07be7bfc00304c724e/onnxsim-0.7.3-cp312-abi3-macosx_13_0_arm64.whl", hash = "sha256:a0ed6594974b7d69a52c3b21d8b6dc8290c68ee7826bfda498f30b63ba7c3260", size = 2935387, upload-time = "2026-08-12T12:53:35.063Z" },
+    { url = "https://files.pythonhosted.org/packages/51/d7/0137a4cde5165b1085e285965f19b3b9d0208236c196a754787b8cf8288a/onnxsim-0.7.3-cp312-abi3-manylinux_2_26_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:5132571a323c07605a6d867c5a517f383b5bcc117d461afc5fceefdba0ef1a34", size = 2846204, upload-time = "2026-08-12T12:53:36.691Z" },
+    { url = "https://files.pythonhosted.org/packages/12/ce/3bd161619ba6829d8059af3a99e2ca5f2feb2684415b91be72d825e86969/onnxsim-0.7.3-cp312-abi3-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:88f40b0d3f434c19bf0629c17eb5aa3c8f788085b201c6ae8cda9d41b83ed7e3", size = 3175807, upload-time = "2026-08-12T12:53:38.065Z" },
+    { url = "https://files.pythonhosted.org/packages/06/5d/38a7c678e63fe727ec979e5579898b71ab153e7db187883d8d13be95da37/onnxsim-0.7.3-cp312-abi3-win_amd64.whl", hash = "sha256:7a911a3ce47bb8038a03ef5beae51c078f31ffafc21b48d4075b06735eabf9a3", size = 3431897, upload-time = "2026-08-12T12:53:39.708Z" },
 ]
 
 [[package]]

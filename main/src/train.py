@@ -290,6 +290,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--epochs", type=int, default=None, help="Override epochs count")
     parser.add_argument("--batch-size", type=int, default=None, help="Override batch size")
     parser.add_argument("--lr", type=float, default=None, help="Override learning rate")
+    parser.add_argument("--patience", type=int, default=None, help="Override early stopping patience")
     parser.add_argument(
         "--device", type=str, default="auto", help="Execution device (cuda/cpu/auto)"
     )
@@ -311,7 +312,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output-dir",
         type=str,
-        default=str(PROJECT_ROOT / "main" / "runs"),
+        default=str(PROJECT_ROOT / "main" / "training_results"),
         help="Directory to save checkpoints and metrics",
     )
     return parser.parse_args()
@@ -341,7 +342,7 @@ def main() -> None:
     learning_rate = args.lr or float(train_cfg["training"]["learning_rate"])
     weight_decay = float(train_cfg["training"].get("weight_decay", 1e-4))
     huber_delta = float(train_cfg["training"].get("huber_delta", 0.1))
-    patience = int(train_cfg["training"].get("early_stopping_patience", 8))
+    patience = args.patience if args.patience is not None else int(train_cfg["training"].get("early_stopping_patience", 8))
     num_workers = 0 if args.dry_run else int(train_cfg["training"].get("num_workers", 2))
 
     # Resolve paths
@@ -385,9 +386,11 @@ def main() -> None:
         eta_min=float(train_cfg["training"].get("min_lr", 1e-5)),
     )
 
-    # Output run directory
+    # Output run directory: structured as output_dir/<model>/run_<timestamp>/
+    model_dir = Path(args.output_dir) / args.model
+    model_dir.mkdir(parents=True, exist_ok=True)
     timestamp = time.strftime("%Y%m%d_%H%M%S")
-    run_dir = Path(args.output_dir) / f"{args.model}_{timestamp}"
+    run_dir = model_dir / f"run_{timestamp}"
     run_dir.mkdir(parents=True, exist_ok=True)
 
     # MLflow Setup
@@ -568,6 +571,22 @@ def main() -> None:
         summary_path = run_dir / "evaluation_summary.json"
         with open(summary_path, "w", encoding="utf-8") as f:
             json.dump(summary, f, indent=2)
+
+        # Mirror latest artifacts directly to model_dir (e.g. main/training_results/micro_vit/)
+        import shutil
+
+        latest_files = [
+            "best_model.pt",
+            "learning_curves.png",
+            "steer_scatter.png",
+            "residual_distribution.png",
+            "evaluation_summary.json",
+        ]
+        for fname in latest_files:
+            src_f = run_dir / fname
+            if src_f.exists():
+                shutil.copy2(src_f, model_dir / fname)
+        logger.info("Latest artifacts mirrored to %s for easy inspection", model_dir)
 
         # Log artifacts to MLflow
         mlflow.log_artifact(str(run_dir / "best_model.pt"), artifact_path="model")

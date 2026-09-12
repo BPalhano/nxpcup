@@ -1,0 +1,18 @@
+{
+  "model": "micro_vit",
+  "best_epoch": 44,
+  "best_val_mae_deg": 5.343623161315918,
+  "test_metrics": {
+    "mae_norm": 0.18874968588352203,
+    "rmse_norm": 0.33548906445503235,
+    "mae_deg": 5.662490367889404,
+    "rmse_deg": 10.064671516418457,
+    "max_err_deg": 54.02383041381836,
+    "r2": 0.6481122865682857
+  },
+  "parameters": {
+    "total": 359841,
+    "trainable": 359841
+  },
+  "timestamp": "20260910_085020"
+}

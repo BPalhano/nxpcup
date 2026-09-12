@@ -1,0 +1,10 @@
+{
+  "onnx_source": "outputs/onnx/micro_vit.onnx",
+  "target_precision": "int8",
+  "min_batch": 1,
+  "opt_batch": 1,
+  "max_batch": 8,
+  "workspace_gb": 1,
+  "status": "ready_for_jetson_compilation",
+  "host_environment": "cpu_development"
+}

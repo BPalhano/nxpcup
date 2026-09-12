@@ -1,0 +1,18 @@
+{
+  "model": "palhano_cnn",
+  "best_epoch": 45,
+  "best_val_mae_deg": 6.3626861572265625,
+  "test_metrics": {
+    "mae_norm": 0.2144699990749359,
+    "rmse_norm": 0.33170321583747864,
+    "mae_deg": 6.4340996742248535,
+    "rmse_deg": 9.951096534729004,
+    "max_err_deg": 49.7556266784668,
+    "r2": 0.6560092756405174
+  },
+  "parameters": {
+    "total": 886037,
+    "trainable": 886037
+  },
+  "timestamp": "20260910_093527"
+}

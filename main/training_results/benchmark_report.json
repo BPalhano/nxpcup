@@ -1,0 +1,80 @@
+{
+  "micro_vit_ONNX": {
+    "mean_ms": 2.29,
+    "p50_ms": 2.16,
+    "p95_ms": 2.65,
+    "p99_ms": 2.8,
+    "std_ms": 0.873,
+    "min_ms": 2.02,
+    "max_ms": 14.66,
+    "fps": 436.7,
+    "params": 359841,
+    "backend": "ONNX",
+    "model": "micro_vit"
+  },
+  "micro_vit_PYTORCH": {
+    "mean_ms": 3.49,
+    "p50_ms": 3.13,
+    "p95_ms": 5.38,
+    "p99_ms": 6.23,
+    "std_ms": 0.98,
+    "min_ms": 2.67,
+    "max_ms": 12.31,
+    "fps": 286.5,
+    "params": 359841,
+    "backend": "PYTORCH",
+    "model": "micro_vit"
+  },
+  "palhano_cnn_ONNX": {
+    "mean_ms": 0.65,
+    "p50_ms": 0.68,
+    "p95_ms": 0.76,
+    "p99_ms": 0.91,
+    "std_ms": 0.088,
+    "min_ms": 0.48,
+    "max_ms": 0.95,
+    "fps": 1535.8,
+    "params": 886037,
+    "backend": "ONNX",
+    "model": "palhano_cnn"
+  },
+  "palhano_cnn_PYTORCH": {
+    "mean_ms": 1.27,
+    "p50_ms": 1.25,
+    "p95_ms": 1.42,
+    "p99_ms": 1.67,
+    "std_ms": 0.11,
+    "min_ms": 1.09,
+    "max_ms": 1.83,
+    "fps": 790.1,
+    "params": 886037,
+    "backend": "PYTORCH",
+    "model": "palhano_cnn"
+  },
+  "dave2_ONNX": {
+    "mean_ms": 0.69,
+    "p50_ms": 0.68,
+    "p95_ms": 0.78,
+    "p99_ms": 0.89,
+    "std_ms": 0.051,
+    "min_ms": 0.61,
+    "max_ms": 1.02,
+    "fps": 1455.2,
+    "params": 1595511,
+    "backend": "ONNX",
+    "model": "dave2"
+  },
+  "dave2_PYTORCH": {
+    "mean_ms": 1.52,
+    "p50_ms": 1.38,
+    "p95_ms": 1.76,
+    "p99_ms": 2.21,
+    "std_ms": 1.239,
+    "min_ms": 1.31,
+    "max_ms": 22.5,
+    "fps": 657.4,
+    "params": 1595511,
+    "backend": "PYTORCH",
+    "model": "dave2"
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "micro_vit": {
+    "model": "micro_vit",
+    "best_epoch": 44,
+    "best_val_mae_deg": 5.343623161315918,
+    "test_metrics": {
+      "mae_norm": 0.18874968588352203,
+      "rmse_norm": 0.33548906445503235,
+      "mae_deg": 5.662490367889404,
+      "rmse_deg": 10.064671516418457,
+      "max_err_deg": 54.02383041381836,
+      "r2": 0.6481122865682857
+    },
+    "parameters": {
+      "total": 359841,
+      "trainable": 359841
+    },
+    "timestamp": "20260910_085020"
+  },
+  "palhano_cnn": {
+    "model": "palhano_cnn",
+    "best_epoch": 45,
+    "best_val_mae_deg": 6.3626861572265625,
+    "test_metrics": {
+      "mae_norm": 0.2144699990749359,
+      "rmse_norm": 0.33170321583747864,
+      "mae_deg": 6.4340996742248535,
+      "rmse_deg": 9.951096534729004,
+      "max_err_deg": 49.7556266784668,
+      "r2": 0.6560092756405174
+    },
+    "parameters": {
+      "total": 886037,
+      "trainable": 886037
+    },
+    "timestamp": "20260910_093527"
+  },
+  "dave2": {
+    "model": "dave2",
+    "best_epoch": 48,
+    "best_val_mae_deg": 4.970724105834961,
+    "test_metrics": {
+      "mae_norm": 0.1715988963842392,
+      "rmse_norm": 0.30412259697914124,
+      "mae_deg": 5.1479668617248535,
+      "rmse_deg": 9.123677253723145,
+      "max_err_deg": 52.101806640625,
+      "r2": 0.7108356413327901
+    },
+    "parameters": {
+      "total": 1595511,
+      "trainable": 1595511
+    },
+    "timestamp": "20260910_094433"
+  }
+}
