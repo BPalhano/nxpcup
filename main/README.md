@@ -16,9 +16,9 @@
 
 ## 📌 Executive Summary
 
-**NXP Cup Autonomous Driving** is an end-to-end autonomous scale 1:10 racing vehicle perception and control system. Developed for the international **NXP Cup** competition track (ENSICAEN, France), this project redesigns academic prototypes into an industrial-grade **Edge AI & MLOps** production platform.
+**NXP Cup Autonomous Driving** is an end-to-end autonomous scale 1:10 racing vehicle perception and control system. Developed for the international NXP Cup competition track at ENSICAEN (France), this project establishes an industrial-grade **Edge AI & MLOps** production platform.
 
-We introduce **MicroViT**, an ultra-compact hybrid Convolutional-Vision Transformer architecture (**359,841 parameters**, **-77.4% smaller than NVIDIA DAVE-2** and **-59.4% smaller than the original ENSICAEN CNN paper**), combined with an online temporal smoother (**MicroViTSmoothed**: Median Filter $K=3$ + Exponential Moving Average $\alpha=0.65$). 
+We introduce **MicroViT**, an ultra-compact hybrid Convolutional-Vision Transformer architecture (**359,841 parameters**, **-77.4% smaller than NVIDIA DAVE-2**), combined with an online temporal smoother (**MicroViTSmoothed**: Median Filter $K=3$ + Exponential Moving Average $\alpha=0.65$).
 
 Through hardware-aware compilation (**ONNX Runtime** and **NVIDIA TensorRT INT8**), the pipeline achieves sub-**2.2 ms** latency (**> 430 FPS**) on embedded edge hardware while demonstrating **+8.2% drift resilience** under harsh shadows and low-light variations (compared to **+76.9% error degradation in NVIDIA DAVE-2**).
 
@@ -59,13 +59,12 @@ flowchart TD
     subgraph MODELS["2. Deep Learning Architectures"]
         LBL --> TRN[Training Pipeline<br>Huber Loss + Cosine LR]
         TRN --> M1["NVIDIA DAVE-2<br>(1,595,511 params)"]
-        TRN --> M2["Palhano CNN Paper<br>(886,037 params)"]
-        TRN --> M3["MicroViT Proposed<br>(359,841 params)"]
-        M3 --> M4["MicroViTSmoothed<br>(Median K=3 + EMA alpha=0.65)"]
+        TRN --> M2["MicroViT Proposed<br>(359,841 params)"]
+        M2 --> M3["MicroViTSmoothed<br>(Median K=3 + EMA alpha=0.65)"]
     end
 
     subgraph OPT["3. Edge Optimization"]
-        M1 & M2 & M3 --> ONX[ONNX Dynamic Exporter<br>onnxsim + shape verification]
+        M1 & M2 --> ONX[ONNX Dynamic Exporter<br>onnxsim + shape verification]
         ONX --> TRT[TensorRT INT8 PTQ<br>IInt8EntropyCalibrator2]
         TRT --> STRAT[Inference Strategy Pattern<br>PyTorch / ONNX / TensorRT]
     end
@@ -101,23 +100,23 @@ flowchart LR
 
 ## 📊 Comprehensive Benchmark & Empirical Results
 
-The four network architectures were evaluated on identical test splits and execution platforms:
+The network architectures were evaluated on identical test splits and execution platforms:
 
-| Architectural Metric / Model | NVIDIA DAVE-2 (2016) | Palhano CNN (Paper) | MicroViT (Ours) | MicroViTSmoothed (Ours) |
-| :--- | :---: | :---: | :---: | :---: |
-| **Total Parameters** | 1,595,511 | 886,037 | **359,841** (*-77.4%*) | **359,841** (*-77.4%*) |
-| **Model Footprint (ONNX)** | 6.09 MB | 3.38 MB | **1.39 MB** (*-77.2%*) | **1.39 MB** (*-77.2%*) |
-| **Computational FLOPs** | 56.5 M | 55.1 M | **31.2 M** (*-44.8%*) | **31.2 M** (*-44.8%*) |
-| **Inference Latency P50** | **1.83 ms** | 1.95 ms | 2.16 ms | 2.18 ms |
-| **Inference Latency P95** | 2.76 ms | 2.50 ms | 2.65 ms | 2.72 ms |
-| **Inference Latency P99** | 3.82 ms | 3.41 ms | 3.48 ms | 3.55 ms |
-| **Throughput (FPS)** | 482.9 FPS | 489.1 FPS | 436.7 FPS | 437.0 FPS |
-| **Nominal Test MAE** | 6.63° | 7.21° | 9.55° (*5.66° @ 50ep*) | 10.95° (*4.91° seq*) |
-| **Drift Test MAE (Shadows)** | 11.73° (*+76.9%*) | 11.51° (*+59.5%*) | 11.56° (*+21.1%*) | **11.85° (+8.2%)** |
-| **Steering Jitter ($\sigma_{\Delta \delta}$)** | 7.82° | 7.45° | 6.88° | **1.95° (-75.0%)** |
-| **Track Off-Course / Crashes** | 4 / 17 runs | 3 / 17 runs | 0 / 17 runs | **0 / 17 runs** |
+| Architectural Metric / Model | NVIDIA DAVE-2 (2016) | MicroViT (Ours) | MicroViTSmoothed (Ours) |
+| :--- | :---: | :---: | :---: |
+| **Total Parameters** | 1,595,511 | **359,841** (*-77.4%*) | **359,841** (*-77.4%*) |
+| **Model Footprint (ONNX)** | 6.09 MB | **1.39 MB** (*-77.2%*) | **1.39 MB** (*-77.2%*) |
+| **Computational FLOPs** | 56.5 M | **31.2 M** (*-44.8%*) | **31.2 M** (*-44.8%*) |
+| **Inference Latency P50** | **1.83 ms** | 2.16 ms | 2.18 ms |
+| **Inference Latency P95** | 2.76 ms | 2.65 ms | 2.72 ms |
+| **Inference Latency P99** | 3.82 ms | 3.48 ms | 3.55 ms |
+| **Throughput (FPS)** | 482.9 FPS | 436.7 FPS | 437.0 FPS |
+| **Nominal Test MAE** | 6.63° | 9.55° (*5.66° @ 50ep*) | 10.95° (*4.91° seq*) |
+| **Drift Test MAE (Shadows)** | 11.73° (*+76.9%*) | 11.56° (*+21.1%*) | **11.85° (+8.2%)** |
+| **Steering Jitter ($\sigma_{\Delta \delta}$)** | 7.82° | 6.88° | **1.95° (-75.0%)** |
+| **Track Off-Course / Crashes** | 4 / 17 runs | 0 / 17 runs | **0 / 17 runs** |
 
-> **Key Takeaway:** Under adverse cast shadows and underexposure (Evidently AI Data Drift simulation), CNN architectures experience severe feature degradation (+76.9% and +59.5% error growth). MicroViT's global self-attention limits degradation to +21.1%, while `MicroViTSmoothed` achieves **+8.2% stability** and reduces steering servo jitter by **75.0%**, preventing high-frequency oscillations and track exits.
+> **Key Takeaway:** Under adverse cast shadows and underexposure (Evidently AI Data Drift simulation), convolutional architectures experience severe feature degradation (+76.9% error growth). MicroViT's global self-attention limits degradation to +21.1%, while `MicroViTSmoothed` achieves **+8.2% stability** and reduces steering servo jitter by **75.0%**, preventing high-frequency oscillations and track exits.
 
 ---
 
@@ -127,10 +126,6 @@ The four network architectures were evaluated on identical test splits and execu
 nxpcup/
 ├── Makefile                                # Automated CLI tasks (test, lint, api, docker)
 ├── pyproject.toml                          # Project configuration & locked dependencies
-├── tec_report_complete.pdf                 # Comprehensive IEEEtran 8-page Technical Report
-├── docs/
-│   ├── tec_report_complete.tex             # LaTeX source code
-│   └── technical_report_microvit.pdf       # Condensed 4-page MicroViT Architecture Report
 ├── recording_dataset/                      # 17 raw MP4 video runs (managed via DVC)
 ├── main/
 │   ├── configs/
@@ -154,13 +149,12 @@ nxpcup/
 │   │   │   ├── dave2.py                    # Baseline NVIDIA DAVE-2
 │   │   │   ├── factory.py                  # ModelFactory design pattern
 │   │   │   ├── micro_vit.py                # MicroViT Transformer architecture
-│   │   │   ├── micro_vit_smoothed.py       # MicroViT with Median + EMA smoother
-│   │   │   └── palhano_cnn.py              # ENSICAEN legacy CNN (886,037 params)
+│   │   │   └── micro_vit_smoothed.py       # MicroViT with Median + EMA smoother
 │   │   ├── monitoring/
 │   │   │   └── drift_report.py             # Evidently AI Data Drift suite
 │   │   ├── optimization/
 │   │   │   ├── onnx_exporter.py            # Dynamic ONNX export & onnxsim
-│   │   │   └── trt_calibrator.py           # TensorRT IInt8EntropyCalibrator2
+│   │   │   ├── trt_calibrator.py           # TensorRT IInt8EntropyCalibrator2
 │   │   │   └── trt_compiler.py             # TensorRT execution engine builder
 │   │   └── train.py                        # Unified training pipeline with MLflow
 │   └── tests/
@@ -177,7 +171,7 @@ nxpcup/
 ## ⚡ Quickstart Guide
 
 ### 1. Environment Installation
-This project leverages [uv](https://github.com/astral-sh/uv) for blazing-fast, deterministic dependency management:
+This project leverages [uv](https://github.com/astral-sh/uv) for deterministic dependency management:
 
 ```bash
 # Clone the repository
@@ -189,22 +183,22 @@ make install
 ```
 
 ### 2. Code Quality & Automated Tests
-Ensure all 40 unit tests, strict typechecking, and linting pass:
+Ensure all automated unit tests, strict typechecking, and linting pass:
 
 ```bash
-# Run full Pytest suite (40/40 tests)
+# Run full Pytest suite
 make test
 
 # Run Ruff linter and code formatter
 make lint
 make format
 
-# Run strict Mypy typechecker across 28 source files
+# Run strict Mypy typechecker across all source files
 make typecheck
 ```
 
 ### 3. Model Training & MLflow Tracking
-Train any of the supported architectures with Huber Loss and Cosine Annealing:
+Train the steering architectures with Huber Loss and Cosine Annealing:
 
 ```bash
 # Train MicroViT (Proposed Transformer)
@@ -212,9 +206,6 @@ make train-microvit
 
 # Train NVIDIA DAVE-2 Baseline
 make train-dave2
-
-# Train PalhanoCNN (ENSICAEN Paper)
-make train-palhano
 ```
 
 ### 4. Edge Optimization (ONNX & TensorRT)
@@ -318,26 +309,11 @@ Access the services:
 
 ---
 
-## 📑 Technical Documentation & Paper
-
-The complete mathematical derivations, architectural proofs, and comparative experimental analyses are compiled in the project's technical reports:
-
-* 📄 **[Comprehensive Technical Report (IEEEtran 8 pages)](file:///home/eulus/Documentos/Personal/nxpcup/tec_report_complete.pdf):** Full treatise including IPM projection, kinematic Stanley formulation, Transformer attention mechanisms, INT8 quantization theorems, and Evidently AI drift metrics.
-* 📄 **[MicroViT Architecture Report (IEEEtran 4 pages)](file:///home/eulus/Documentos/Personal/nxpcup/docs/technical_report_microvit.pdf):** Condensed publication-ready paper focusing on the MicroViT architecture vs. NVIDIA DAVE-2.
-
-To recompile the LaTeX documents:
-```bash
-make report
-```
-
----
-
 ## 👤 Author & Acknowledgments
 
 * **Lead Engineer / Author:** Igor Braga Palhano
-* **Institution:** ENSICAEN (École Nationale Supérieure d'Ingénieurs de Caen, France)
+* **Institution:** ENSICAEN (École Nationale Supérieure d'Ingénieurs de Caen, France) & Universidade Federal do Ceará (UFC, Brazil)
 * **Domain:** Autonomous Systems, Embedded Edge AI & MLOps
-* **Competition:** NXP Cup EMEA / International
 
 ---
 

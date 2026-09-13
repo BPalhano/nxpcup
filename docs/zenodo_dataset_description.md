@@ -35,7 +35,7 @@ Each frame is annotated with **continuous, physics-informed ground-truth steerin
 
 2. **3,433 Rectified Perception Frames (`images_200x66/`):**
    * Resolution: $200 \times 66$ pixels, RGB 24-bit.
-   * Cropped and perspective-normalized to match the input standard of canonical autonomous driving backbones (e.g., NVIDIA DAVE-2, PalhanoCNN, MicroViT).
+   * Cropped and perspective-normalized to match the input standard of canonical autonomous driving backbones (e.g., NVIDIA DAVE-2, MicroViT).
 
 3. **Continuous Ground-Truth Labels (`labels_continuous.csv`):**
    * 3,433 rows providing continuous target steering angles ($\delta_{\text{next\_step}}$ in degrees and $[-1.0, +1.0]$ normalized space).
@@ -120,7 +120,6 @@ nxpcup_autonomous_racing_dataset/
 | Architecture | Model Paradigm | Parameters | FP32 Size | ONNX P50 Latency | Throughput | Clean Test MAE | Drift Test MAE (Shadows) |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **NVIDIA DAVE-2** | Deep ConvNet | 1,595,511 | 6.09 MB | 1.25 ms | 813.8 FPS | 6.63° | 11.73° (+76.9% fail) |
-| **PalhanoCNN** | Pruned ConvNet | 886,037 | 3.38 MB | 0.71 ms | 1324.9 FPS | 7.21° | 11.51° (+59.5% sensitive) |
 | **MicroViT (Proposed)** | Hybrid ViT | **359,841** | **1.39 MB** | 2.70 ms | 373.8 FPS | **5.66°** | **11.56° (+21.1% resilient)** |
 | **MicroViTSmoothed** | ViT + Filter | **359,841** | **1.39 MB** | **2.18 ms** | **437.0 FPS** | **4.91° (lap)** | **11.85° (+8.2% immune)** |
 

@@ -1,8 +1,8 @@
-"""Palhano CNN Model Implementation from ENSICAEN NXP Cup Paper.
+"""Pruned Convolutional Baseline Model for NXP Cup Autonomous Driving.
 
-Reference:
-    Palhano, I. B., "End-to-End Low-Dimensional Autonomous Car For Competition",
-    ENSICAEN / NXP Cup. Exactly 886,037 parameters.
+Architecture:
+    Compact 5-layer convolutional baseline with dense regression head.
+    Exactly 886,037 parameters.
 """
 
 from __future__ import annotations
@@ -12,7 +12,7 @@ import torch.nn as nn
 
 
 class PalhanoCNN(nn.Module):
-    """Palhano CNN architecture for real-time steering angle regression.
+    """Pruned convolutional network architecture for steering regression.
 
     Architecture (exactly 886,037 parameters for 66x200 input):
         - Conv1: 24 filters 5x5, stride 2 (output: 24x31x98)
@@ -34,7 +34,7 @@ class PalhanoCNN(nn.Module):
         output_dim: int = 1,
         activation: str = "elu",
     ) -> None:
-        """Initialize PalhanoCNN model.
+        """Initialize convolutional regression model.
 
         Args:
             input_channels: Number of input image channels (default: 3 for RGB).

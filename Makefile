@@ -1,4 +1,4 @@
-.PHONY: install sync lint format typecheck test clean auto-label train-microvit train-dave2 train-palhano drift benchmark export-onnx report api docker-build docker-run docker-compose-up
+.PHONY: install sync lint format typecheck test clean auto-label train-microvit train-dave2 drift benchmark export-onnx api docker-build docker-run docker-compose-up
 
 install:
 	@echo "==> Instalando dependências com uv..."
@@ -32,10 +32,6 @@ train-dave2:
 	@echo "==> Treinando NVIDIA DAVE-2 com MLflow..."
 	uv run --directory main python -m src.train --model dave2
 
-train-palhano:
-	@echo "==> Treinando PalhanoCNN com MLflow..."
-	uv run --directory main python -m src.train --model palhano_cnn
-
 drift:
 	@echo "==> Executando análise de Data Drift com Evidently AI..."
 	uv run --directory main python -m src.monitoring.drift_report
@@ -47,14 +43,6 @@ benchmark:
 export-onnx:
 	@echo "==> Exportando modelos para ONNX otimizado..."
 	uv run --directory main python -m src.optimization.onnx_exporter --model all
-
-report:
-	@echo "==> Compilando relatório técnico completo em LaTeX (8 páginas IEEEtran)..."
-	cd docs && pdflatex -interaction=nonstopmode tec_report_complete.tex && pdflatex -interaction=nonstopmode tec_report_complete.tex
-	cp docs/tec_report_complete.pdf tec_report_complete.pdf
-	@echo "==> Compilando relatório técnico MicroViT (4 páginas IEEEtran)..."
-	cd docs && pdflatex -interaction=nonstopmode technical_report_microvit.tex && pdflatex -interaction=nonstopmode technical_report_microvit.tex
-	cp docs/technical_report_microvit.pdf docs/technical_report.pdf
 
 api:
 	@echo "==> Iniciando serviço de inferência FastAPI com Uvicorn..."

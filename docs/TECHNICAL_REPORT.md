@@ -355,7 +355,7 @@ The synthesized labels and segmentations have been integrated into the companion
    * [`main/data/processed/segmented_labels.csv`](file:///home/eulus/Documentos/Personal/nxpcup/main/data/processed/segmented_labels.csv): Complete schema with 22 telemetry columns.
    * [`main/data/processed/labels_continuous.csv`](file:///home/eulus/Documentos/Personal/nxpcup/main/data/processed/labels_continuous.csv): Aligned schema mapping `angle_deg = next_step_steer_deg` and `angle_norm = next_step_steer_norm`.
 2. **Dataset Architecture Compatibility:**
-   [`main/data/dataset.py`](file:///home/eulus/Documentos/Personal/nxpcup/main/data/dataset.py) loads `next_step_steer_deg` as the target ground truth, enabling end-to-end models (**MicroViT**, **NVIDIA DAVE-2**, **PalhanoCNN**) to directly optimize for track centering.
+   [`main/data/dataset.py`](file:///home/eulus/Documentos/Personal/nxpcup/main/data/dataset.py) loads `next_step_steer_deg` as the target ground truth, enabling end-to-end models (**MicroViT**, **NVIDIA DAVE-2**) to directly optimize for track centering.
 3. **Automated Verification:**
    All 10 unit tests in `pytest main/tests -v` passed with 100% compliance.
 
