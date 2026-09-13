@@ -25,7 +25,7 @@ MAIN_DIR = PROJECT_ROOT / "main"
 if str(MAIN_DIR) not in sys.path:
     sys.path.insert(0, str(MAIN_DIR))
 
-from main.src.models import ModelFactory  # noqa: E402
+from main.src.models import MedianEMASmoother, ModelFactory  # noqa: E402
 
 logging.basicConfig(
     level=logging.INFO,
@@ -61,6 +61,10 @@ def preprocess_image(image: np.ndarray) -> np.ndarray:
 
 class BaseInferenceStrategy(ABC):
     """Abstract Strategy interface for steering angle inference."""
+
+    def reset(self) -> None:  # noqa: B027
+        """Resets any internal temporal state (used by smoothers)."""
+        pass
 
     @abstractmethod
     def infer(self, image: np.ndarray) -> dict[str, float]:
@@ -208,21 +212,104 @@ class TensorRTInferenceStrategy(BaseInferenceStrategy):
         }
 
 
+class SmoothedInferenceStrategy(BaseInferenceStrategy):
+    """Decorator strategy adding online Moving Median + EMA filtering.
+
+    Provides real-time temporal post-processing for vehicle steering:
+    - Moving Median (default K=3) rejects transient non-linear spikes.
+    - EMA (default alpha=0.65) ensures kinematic smoothness and jitter attenuation.
+    """
+
+    def __init__(
+        self,
+        base_strategy: BaseInferenceStrategy,
+        window_size: int = 3,
+        alpha: float = 0.65,
+        max_angle_deg: float = 30.0,
+    ) -> None:
+        self.base_strategy = base_strategy
+        self.smoother = MedianEMASmoother(
+            window_size=window_size,
+            alpha=alpha,
+            max_angle_deg=max_angle_deg,
+        )
+
+    def reset(self) -> None:
+        """Resets online temporal smoother state."""
+        self.smoother.reset()
+        self.base_strategy.reset()
+
+    def infer_batch(self, batch_tensor: np.ndarray) -> np.ndarray:
+        raw_out = self.base_strategy.infer_batch(batch_tensor)
+        if raw_out.shape[0] == 1:
+            raw_deg = float(raw_out[0, 0]) * self.smoother.max_angle_deg
+            smoothed_deg = self.smoother.update(raw_deg)
+            return np.array([[smoothed_deg / self.smoother.max_angle_deg]], dtype=np.float32)
+        return raw_out
+
+    def infer(self, image: np.ndarray) -> dict[str, float]:
+        t0 = time.perf_counter_ns()
+        res = self.base_strategy.infer(image)
+        smoothed_deg = self.smoother.update(res["angle_deg"])
+        total_lat = (time.perf_counter_ns() - t0) / 1_000_000.0
+
+        return {
+            "angle_deg": round(smoothed_deg, 2),
+            "angle_norm": round(smoothed_deg / self.smoother.max_angle_deg, 4),
+            "raw_angle_deg": round(res["angle_deg"], 2),
+            "latency_ms": round(total_lat, 3),
+        }
+
+
 def create_inference_engine(
     backend: str,
     model_name_or_path: str,
     checkpoint_path: str | None = None,
     device: str = "cpu",
+    apply_smoothing: bool = False,
+    window_size: int = 3,
+    alpha: float = 0.65,
 ) -> BaseInferenceStrategy:
-    """Factory function for creating inference strategies."""
+    """Factory function for creating inference strategies.
+
+    Supports:
+    - Native PyTorch, ONNX Runtime, and TensorRT engines.
+    - Automatic temporal smoothing for 'micro_vit_smoothed'.
+    - Explicit temporal smoothing via apply_smoothing=True.
+    """
     backend = backend.lower()
+    model_lower = Path(model_name_or_path).stem.lower()
+
+    if model_lower in ["micro_vit_smoothed", "microvit_smoothed"]:
+        apply_smoothing = True
+        # Resolve underlying base path/name
+        if backend in ["onnx", "onnxruntime"] and not Path(model_name_or_path).exists():
+            resolved_onnx = MAIN_DIR / "training_results" / "micro_vit" / "micro_vit.onnx"
+            if resolved_onnx.exists():
+                model_name_or_path = str(resolved_onnx)
+            else:
+                model_name_or_path = "micro_vit"
+        elif backend == "pytorch":
+            model_name_or_path = "micro_vit"
+
+    engine: BaseInferenceStrategy
     if backend == "pytorch":
-        return PyTorchInferenceStrategy(model_name_or_path, checkpoint_path, device=device)
+        engine = PyTorchInferenceStrategy(model_name_or_path, checkpoint_path, device=device)
     elif backend in ["onnx", "onnxruntime"]:
-        return ONNXRuntimeInferenceStrategy(model_name_or_path)
+        engine = ONNXRuntimeInferenceStrategy(model_name_or_path)
     elif backend in ["trt", "tensorrt"]:
-        return TensorRTInferenceStrategy(model_name_or_path)
+        engine = TensorRTInferenceStrategy(model_name_or_path)
     else:
         raise ValueError(
             f"Unknown inference backend: {backend}. Supported: [pytorch, onnx, tensorrt]"
         )
+
+    if apply_smoothing:
+        return SmoothedInferenceStrategy(
+            base_strategy=engine,
+            window_size=window_size,
+            alpha=alpha,
+        )
+
+    return engine
+

@@ -19,7 +19,7 @@ Este plano de estudos foi desenhado especificamente para o projeto **NXP Cup (En
 * **Progresso da Esteira de Especialista:**
   1. ✅ **Pilar 1 (Modelagem):** Superado o gargalo convolucional com o **MicroViT** (359k parâmetros, Test MAE **5.66°** no split de teste real, superando os 6.43° do paper) e unificado via Factory Pattern com Huber Loss e MLflow.
   2. ✅ **Pilar 2 (Edge Optimization):** Exportação **ONNX dinâmica** com paridade numérica (< 10⁻⁷), `onnxsim`, calibrador `IInt8EntropyCalibrator2`, Strategy Pattern e benchmark P50/P95/P99. **MicroViT atingiu 2.16 ms P50 e 436.7 FPS**.
-  3. ⏳ **Pilar 3 (MLOps & Drift):** Relatório de Data Drift no **Evidently AI** comparando voltas com iluminação normal vs. sombras. (Em andamento)
+  3. ✅ **Pilar 3 (MLOps & Drift):** Relatório de Data Drift no **Evidently AI** comparando voltas normais vs. sombras/baixa luz. Comprovada a tese: **MicroViT degradou apenas +19.7%** contra **+80.2% do DAVE-2**, registrando o menor erro sob pista degradada.
 
 ---
 

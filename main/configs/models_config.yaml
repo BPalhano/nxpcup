@@ -24,3 +24,22 @@ micro_vit:
   dropout: 0.1
   attention_dropout: 0.1
   output_dim: 1
+
+micro_vit_smoothed:
+  name: "micro_vit_smoothed"
+  base_architecture: "micro_vit"
+  input_shape: [3, 66, 200]
+  stem_channels: [32, 64]
+  patch_size: [2, 2]
+  embed_dim: 128
+  depth: 2
+  num_heads: 4
+  mlp_ratio: 2.0
+  dropout: 0.1
+  attention_dropout: 0.1
+  output_dim: 1
+  filter:
+    type: "median_ema"
+    window_size: 3
+    alpha: 0.65
+    max_angle_deg: 30.0

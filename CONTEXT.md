@@ -207,7 +207,7 @@ uv run --directory main python -m src.train --model micro_vit --epochs 35 --batc
 | :--- | :--- | :---: |
 | **Sprint 0 & 1** | Setup, amostragem determinística 10 FPS, segmentação BEV, labels cinemáticos | ✅ Concluído |
 | **Sprint 2** | DAVE-2, PalhanoCNN (886k), MicroViT (359k), ModelFactory, MLflow Pipeline | ✅ Concluído |
-| **Sprint 3** | Exportação ONNX, simplificação onnxsim, calibração INT8 TensorRT, benchmarks | ✅ Concluído (P50 1.56 ms, 629 FPS) |
-| **Sprint 4** | Monitoramento de Data Drift com Evidently AI (voltas normais vs. com sombras) | ⏳ Em Andamento |
+| **Sprint 3** | Exportação ONNX, simplificação onnxsim, calibração INT8 TensorRT, benchmarks | ✅ Concluído (P50 2.16 ms, 436.7 FPS) |
+| **Sprint 4** | Monitoramento de Data Drift com Evidently AI (voltas normais vs. com sombras) | ✅ Concluído (MicroViT degrada apenas +19.7% vs +80.2% DAVE-2) |
 | **Sprint 5** | Microsserviço FastAPI (`POST /steer`), empacotamento Docker multi-stage, README | ⏳ Próximo |
 

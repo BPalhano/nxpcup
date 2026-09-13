@@ -11,6 +11,7 @@ import torch.nn as nn
 
 from main.src.models.dave2 import DAVE2
 from main.src.models.micro_vit import MicroViT
+from main.src.models.micro_vit_smoothed import MicroViTSmoothed
 from main.src.models.palhano_cnn import PalhanoCNN
 
 
@@ -24,6 +25,8 @@ class ModelFactory:
         "palhano": PalhanoCNN,
         "micro_vit": MicroViT,
         "microvit": MicroViT,
+        "micro_vit_smoothed": MicroViTSmoothed,
+        "microvit_smoothed": MicroViTSmoothed,
     }
 
     @classmethod

@@ -176,6 +176,7 @@ def main() -> None:
     dummy_batch = np.random.randn(1, 3, 66, 200).astype(np.float32)
 
     configurations = [
+        ("micro_vit_smoothed", "onnx", out_dir / "micro_vit" / "micro_vit.onnx"),
         ("micro_vit", "onnx", out_dir / "micro_vit" / "micro_vit.onnx"),
         ("micro_vit", "pytorch", out_dir / "micro_vit" / "best_model.pt"),
         ("palhano_cnn", "onnx", out_dir / "palhano_cnn" / "palhano_cnn.onnx"),
@@ -195,15 +196,23 @@ def main() -> None:
         logger.info("Benchmarking: %s...", label)
 
         try:
+            apply_smooth = "smoothed" in m_name
             if backend == "onnx":
                 if not model_file.exists():
                     logger.warning("ONNX file %s missing, skipping.", model_file)
                     continue
-                engine = create_inference_engine(backend="onnx", model_name_or_path=str(model_file))
+                engine = create_inference_engine(
+                    backend="onnx",
+                    model_name_or_path=str(model_file),
+                    apply_smoothing=apply_smooth,
+                )
             else:
                 ckpt = str(model_file) if model_file.exists() else None
                 engine = create_inference_engine(
-                    backend="pytorch", model_name_or_path=m_name, checkpoint_path=ckpt
+                    backend="pytorch",
+                    model_name_or_path=m_name,
+                    checkpoint_path=ckpt,
+                    apply_smoothing=apply_smooth,
                 )
 
             stats = benchmark_engine(

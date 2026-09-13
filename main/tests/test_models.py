@@ -2,12 +2,15 @@
 
 import io
 
+import numpy as np
 import pytest
 import torch
 
 from main.src.models import (
     DAVE2,
+    MedianEMASmoother,
     MicroViT,
+    MicroViTSmoothed,
     ModelFactory,
     PalhanoCNN,
     count_parameters,
@@ -88,8 +91,57 @@ def test_model_factory_dispatch() -> None:
     vit = ModelFactory.create("micro_vit")
     assert isinstance(vit, MicroViT)
 
+    vit_smoothed = ModelFactory.create("micro_vit_smoothed")
+    assert isinstance(vit_smoothed, MicroViTSmoothed)
+
     with pytest.raises(ValueError, match="Unknown model name"):
         ModelFactory.create("unsupported_model_xyz")
+
+
+def test_median_ema_smoother_properties() -> None:
+    """Verifies outlier rejection and exponential smoothing properties."""
+    smoother = MedianEMASmoother(window_size=3, alpha=0.65, max_angle_deg=30.0)
+
+    # 1. Single transient spike rejection: sequence [0, 0, 25.0, 0, 0]
+    # At t=2: window is [0, 0, 25.0] -> median is 0.0 -> EMA remains 0.0!
+    out0 = smoother.update(0.0)
+    out1 = smoother.update(0.0)
+    out2 = smoother.update(25.0)  # Transient shadow noise spike!
+    out3 = smoother.update(0.0)
+
+    assert out0 == 0.0
+    assert out1 == 0.0
+    assert out2 == 0.0, f"Expected 0.0 spike rejection, got {out2}"
+    assert out3 == 0.0
+
+    # 2. Smooth sequence batch processing
+    smoother.reset()
+    seq = np.array([5.0, 10.0, 15.0, 20.0], dtype=np.float32)
+    smoothed = smoother.smooth_sequence(seq)
+    assert len(smoothed) == len(seq)
+    assert np.all(smoothed <= 20.0)
+    assert np.all(smoothed >= 5.0)
+
+
+def test_micro_vit_smoothed_architecture(dummy_input: torch.Tensor) -> None:
+    """Verifies MicroViTSmoothed parameter count, eval filtering and training mode."""
+    model = MicroViTSmoothed()
+
+    # Train mode should output raw tensor (4, 1)
+    model.train()
+    out_train = model(dummy_input)
+    assert out_train.shape == (4, 1)
+
+    # Eval mode single frame should apply online filter
+    model.eval()
+    single_inp = dummy_input[:1]
+    out_eval = model(single_inp)
+    assert out_eval.shape == (1, 1)
+    assert -1.0 <= float(out_eval[0, 0].item()) <= 1.0
+
+    # Counts should match MicroViT
+    counts = count_parameters(model)
+    assert 340_000 <= counts["total"] <= 450_000
 
 
 @pytest.mark.parametrize("model_name", ["dave2", "palhano_cnn", "micro_vit"])
@@ -113,3 +165,4 @@ def test_onnx_export_compatibility(model_name: str) -> None:
     )
 
     assert len(buffer.getvalue()) > 10_000
+

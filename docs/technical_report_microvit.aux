@@ -1,0 +1,48 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{bojarski2016end}
+\citation{bojarski2016end}
+\citation{palhano2026kart}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}The Fragility of Local Receptive Fields in Deep CNNs}{1}{subsection.1.1}\protected@file@percent }
+\citation{palhano2026kart}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2}Contributions}{2}{subsection.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Neural Architectures for End-to-End Steering}{2}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}NVIDIA DAVE-2 Baseline}{2}{subsection.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}PalhanoCNN (Paper Baseline)}{2}{subsection.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Proposed Architecture: MicroViT}{2}{subsection.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Edge Optimization \& Sub-Millisecond Inference Engine}{2}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Dynamic ONNX Graph Simplification}{2}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}TensorRT INT8 Post-Training Quantization}{2}{subsection.3.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Architectural Specifications and Edge Execution Performance Benchmark}}{3}{table.1}\protected@file@percent }
+\newlabel{tab:architectures}{{1}{3}{Architectural Specifications and Edge Execution Performance Benchmark}{table.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Inference Latency Benchmarking}{3}{subsection.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Photometric Drift Simulation \& Evidently AI Monitoring}{3}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Environmental Drift Formulation}{3}{subsection.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Evidently AI Covariate Shift Analysis}{3}{subsection.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Online Temporal Smoothing \& Jitter Attenuation}{3}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Formulation of \texttt  {MicroViTSmoothed}}{3}{subsection.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6}Experimental Results and Comparative Analysis}{3}{section.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Analysis of Experimental Results}{3}{subsection.6.1}\protected@file@percent }
+\bibcite{bojarski2016end}{1}
+\bibcite{palhano2026kart}{2}
+\bibcite{dosovitskiy2020image}{3}
+\bibcite{liu2021swin}{4}
+\bibcite{evidently2024}{5}
+\bibcite{nvidia2024tensorrt}{6}
+\bibcite{hoffmann2007autonomous}{7}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Inference throughput comparison (FPS) across PyTorch and ONNX Runtime backends. All models surpass the 30\,FPS physical camera sampling rate by more than $7\times $.}}{4}{figure.1}\protected@file@percent }
+\newlabel{fig:throughput}{{1}{4}{Inference throughput comparison (FPS) across PyTorch and ONNX Runtime backends. All models surpass the 30\,FPS physical camera sampling rate by more than $7\times $}{figure.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Latency distribution (violin plot) for all evaluated architectures. MicroViT variants demonstrate tight execution bounds without outlier tails.}}{4}{figure.2}\protected@file@percent }
+\newlabel{fig:violin}{{2}{4}{Latency distribution (violin plot) for all evaluated architectures. MicroViT variants demonstrate tight execution bounds without outlier tails}{figure.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Comprehensive Resilience and Performance Comparison Under Photometric Drift}}{4}{table.2}\protected@file@percent }
+\newlabel{tab:resilience}{{2}{4}{Comprehensive Resilience and Performance Comparison Under Photometric Drift}{table.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Feature distribution shift under synthetic environmental drift (low light and cast shadows). Both mean brightness and contrast shift significantly ($p < 10^{-5}$).}}{4}{figure.3}\protected@file@percent }
+\newlabel{fig:drift_feats}{{3}{4}{Feature distribution shift under synthetic environmental drift (low light and cast shadows). Both mean brightness and contrast shift significantly ($p < 10^{-5}$)}{figure.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Model resilience comparison under environmental drift (Baseline vs. Drift MAE). \texttt  {MicroViTSmoothed} achieves the lowest relative degradation (+8.2\%) among all models.}}{4}{figure.4}\protected@file@percent }
+\newlabel{fig:resilience}{{4}{4}{Model resilience comparison under environmental drift (Baseline vs. Drift MAE). \texttt {MicroViTSmoothed} achieves the lowest relative degradation (+8.2\%) among all models}{figure.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Conclusion}{4}{section.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{References}{4}{section*.1}\protected@file@percent }
+\gdef \@abspage@last{4}

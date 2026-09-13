@@ -3,12 +3,15 @@
 from main.src.models.dave2 import DAVE2
 from main.src.models.factory import ModelFactory, count_parameters, get_model_summary_str
 from main.src.models.micro_vit import MicroViT
+from main.src.models.micro_vit_smoothed import MedianEMASmoother, MicroViTSmoothed
 from main.src.models.palhano_cnn import PalhanoCNN
 
 __all__ = [
     "DAVE2",
     "PalhanoCNN",
     "MicroViT",
+    "MicroViTSmoothed",
+    "MedianEMASmoother",
     "ModelFactory",
     "count_parameters",
     "get_model_summary_str",

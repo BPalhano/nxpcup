@@ -36,6 +36,26 @@ train-palhano:
 	@echo "==> Treinando PalhanoCNN com MLflow..."
 	uv run --directory main python -m src.train --model palhano_cnn
 
+drift:
+	@echo "==> Executando análise de Data Drift com Evidently AI..."
+	uv run --directory main python -m src.monitoring.drift_report
+
+benchmark:
+	@echo "==> Executando benchmark estatístico de inferência..."
+	uv run --directory main python -m src.inference.benchmark
+
+export-onnx:
+	@echo "==> Exportando modelos para ONNX otimizado..."
+	uv run --directory main python -m src.optimization.onnx_exporter --model all
+
+report:
+	@echo "==> Compilando relatório técnico completo em LaTeX (8 páginas IEEEtran)..."
+	cd docs && pdflatex -interaction=nonstopmode tec_report_complete.tex && pdflatex -interaction=nonstopmode tec_report_complete.tex
+	cp docs/tec_report_complete.pdf tec_report_complete.pdf
+	@echo "==> Compilando relatório técnico MicroViT (4 páginas IEEEtran)..."
+	cd docs && pdflatex -interaction=nonstopmode technical_report_microvit.tex && pdflatex -interaction=nonstopmode technical_report_microvit.tex
+	cp docs/technical_report_microvit.pdf docs/technical_report.pdf
+
 clean:
 	@echo "==> Limpando caches e arquivos temporários..."
 	find . -type d -name "__pycache__" -exec rm -rf {} +
