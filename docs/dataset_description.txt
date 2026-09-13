@@ -1,0 +1,28 @@
+NXP Cup Autonomous Racing Dataset (ENSICAEN)
+
+1. Visão Geral:
+Dataset de visão computacional coletado com um carrinho autônomo escala 1:10 na pista oficial da competição NXP Cup (ENSICAEN, França). A pista é formada por lona branca com fitas pretas de 2,5 cm nas bordas demarcando a trajetória.
+
+2. Conteúdo do Dataset:
+- 17 vídeos originais (.mp4, ~339 MB) gravados pela câmera frontal do carrinho em diferentes voltas e condições de iluminação.
+- 3.433 imagens RGB no tamanho 200x66 (.jpg, ~13 MB), já recortadas e normalizadas para uso direto em redes de direção autônoma (como DAVE-2 e afins).
+- labels_continuous.csv: arquivo com os rótulos de cada frame (ângulo contínuo de esterçamento de -30° a +30°, desvio lateral do centro da pista em pixels, curvatura e waypoints calculados por algoritmos clássicos de Pure Pursuit e Stanley).
+- labels_clean.csv: versão simplificada contendo apenas nome do arquivo, ângulo em graus (-30° a +30°), ângulo normalizado (-1 a 1) e classe da manobra (reta, curva, cruzamento).
+
+3. Estrutura dos Arquivos:
+dataset/
+├── raw_videos/           # 17 vídeos das voltas (.mp4)
+├── images_200x66/        # 3.433 frames extraídos (.jpg)
+├── labels_continuous.csv # Tabela completa de telemetria e esterço contínuo
+└── labels_clean.csv      # Tabela simplificada (filename, angle_deg, angle_norm, class_name)
+
+4. Principais Colunas do CSV:
+- filename: nome da imagem correspondente.
+- next_step_steer_deg: ângulo de esterço recomendado (-30.0 a +30.0 graus).
+- next_step_steer_norm: ângulo normalizado entre -1.0 (esquerda) e +1.0 (direita).
+- lateral_offset_px: distância lateral do carrinho em relação ao centro da pista.
+- curvature: curvatura estimada da pista no instante.
+- class_name: classificação do trecho (straight, turn_left, turn_right, crossroad).
+
+5. Aplicação:
+Voltado para treinamento e benchmark de redes neurais de direção de ponta a ponta (end-to-end), estudos de controle embarcado em tempo real e análise de robustez/drift com variações de luz e sombra.

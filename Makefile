@@ -1,4 +1,4 @@
-.PHONY: install sync lint format typecheck test clean
+.PHONY: install sync lint format typecheck test clean auto-label train-microvit train-dave2 train-palhano drift benchmark export-onnx report api docker-build docker-run docker-compose-up
 
 install:
 	@echo "==> Instalando dependências com uv..."
@@ -56,6 +56,22 @@ report:
 	cd docs && pdflatex -interaction=nonstopmode technical_report_microvit.tex && pdflatex -interaction=nonstopmode technical_report_microvit.tex
 	cp docs/technical_report_microvit.pdf docs/technical_report.pdf
 
+api:
+	@echo "==> Iniciando serviço de inferência FastAPI com Uvicorn..."
+	uv run uvicorn main.src.api.app:app --host 0.0.0.0 --port 8000 --reload
+
+docker-build:
+	@echo "==> Construindo imagem Docker multi-stage (nxpcup-vision:latest)..."
+	docker build -t nxpcup-vision:latest -f main/docker/Dockerfile .
+
+docker-run:
+	@echo "==> Executando container nxpcup-vision em background..."
+	docker run -d -p 8000:8000 --name nxpcup-vision-api nxpcup-vision:latest
+
+docker-compose-up:
+	@echo "==> Subindo stack completa (FastAPI + MLflow) com Docker Compose..."
+	docker compose -f main/docker/docker-compose.yml up -d
+
 clean:
 	@echo "==> Limpando caches e arquivos temporários..."
 	find . -type d -name "__pycache__" -exec rm -rf {} +
@@ -63,3 +79,4 @@ clean:
 	find . -type d -name ".mypy_cache" -exec rm -rf {} +
 	find . -type d -name ".ruff_cache" -exec rm -rf {} +
 	rm -rf *.egg-info
+	rm -f docs/*.aux docs/*.log docs/*.out docs/*.fls docs/*.fdb_latexmk docs/*.synctex.gz

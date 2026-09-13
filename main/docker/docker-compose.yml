@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  nxpcup-api:
+    build:
+      context: ../..
+      dockerfile: main/docker/Dockerfile
+    container_name: nxpcup-vision-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DEFAULT_MODEL=micro_vit_smoothed
+      - DEFAULT_BACKEND=onnx
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  mlflow-ui:
+    image: python:3.12-slim-bookworm
+    container_name: nxpcup-mlflow-ui
+    restart: unless-stopped
+    command: >
+      sh -c "pip install --no-cache-dir mlflow>=2.10.0 &&
+             mlflow ui --host 0.0.0.0 --port 5000 --backend-store-uri /mlruns"
+    volumes:
+      - ../../mlruns:/mlruns
+    ports:
+      - "5000:5000"

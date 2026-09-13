@@ -1,0 +1,17 @@
+.git
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+.mypy_cache
+.ruff_cache
+*.egg-info
+recording_dataset
+docs/*.aux
+docs/*.log
+docs/*.out
+docs/*.toc
+mlruns
+main/tf
+main/traitement_image
+main/deep_learning
