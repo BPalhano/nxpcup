@@ -1,4 +1,4 @@
-# 🏎️ NXP Cup Autonomous Driving — MicroViT & Edge AI MLOps
+# NXP Cup Autonomous Driving: MicroViT and Edge AI MLOps
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.12-3776AB.svg?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.12" />
@@ -14,91 +14,93 @@
 
 ---
 
-## 📌 Executive Summary
+## Executive Summary
 
-**NXP Cup Autonomous Driving** is an end-to-end autonomous scale 1:10 racing vehicle perception and control system. Developed for the international NXP Cup competition track at ENSICAEN (France), this project establishes an industrial-grade **Edge AI & MLOps** production platform.
+**NXP Cup Autonomous Driving** is an end-to-end perception and control platform for 1:10 scale autonomous racing vehicles. Developed for the international NXP Cup competition track at ENSICAEN (France), this project establishes an industrial-grade **Edge AI & MLOps** production system.
 
-We introduce **MicroViT**, an ultra-compact hybrid Convolutional-Vision Transformer architecture (**359,841 parameters**, **-77.4% smaller than NVIDIA DAVE-2**), combined with an online temporal smoother (**MicroViTSmoothed**: Median Filter $K=3$ + Exponential Moving Average $\alpha=0.65$).
+We introduce **MicroViT**, an ultra-compact hybrid Convolutional-Vision Transformer architecture (**359,841 parameters**, **77.4% smaller than NVIDIA DAVE-2**), coupled with an online temporal filtering pipeline (**MicroViTSmoothed**: Median Filter with window size $K = 3$ and Exponential Moving Average with smoothing factor $lpha = 0.65$).
 
-Through hardware-aware compilation (**ONNX Runtime** and **NVIDIA TensorRT INT8**), the pipeline achieves sub-**2.2 ms** latency (**> 430 FPS**) on embedded edge hardware while demonstrating **+8.2% drift resilience** under harsh shadows and low-light variations (compared to **+76.9% error degradation in NVIDIA DAVE-2**).
+Through hardware-aware compilation (**ONNX Runtime** and **NVIDIA TensorRT INT8**), the pipeline achieves sub-**2.2 ms** latency (**> 430 FPS**) on embedded edge hardware while demonstrating **+8.2% drift resilience** under adverse shadows and low-light variations (compared to **+76.9% error degradation in NVIDIA DAVE-2**).
 
 ---
 
-## 🏁 Key Technical Innovations
+## Key Technical Innovations
 
 1. **MicroViT-NXP (Hybrid Vision Transformer):**
-   * Eliminates the inductive bias limitation of purely local $5 \times 5$ convolutions via dual-stage strided ConvStem ($16 \times 50 \times 64$) and Multi-Head Self-Attention ($d_{\text{model}}=128$, 4 heads, 2 blocks).
-   * Encodes simultaneous spatial relations between left and right track guide markers across 200 spatial tokens.
+   * Overcomes the inductive bias limitations of purely local $5 \times 5$ convolutions via a dual-stage strided ConvStem ($16 \times 50 \times 64$) and Multi-Head Self-Attention ($d = 128$, 4 attention heads, 2 transformer blocks).
+   * Encodes simultaneous spatial relations between left and right track boundaries across 200 spatial tokens.
 2. **Deterministic Kinematic Auto-Labeling (3D Bird's Eye View):**
-   * Multi-cue Canny + Black Top-Hat road segmentation transformed via Inverse Perspective Mapping (IPM).
-   * Continuous steering target formulation based on **Stanley Cross-Track Error + Pure Pursuit Lookahead** ($\delta_{\text{next\_step}} \in [-30.0^\circ, +30.0^\circ]$), replacing coarse discrete classification.
-3. **Hardware Acceleration & INT8 PTQ:**
+   * Multi-cue Canny and Black Top-Hat road segmentation transformed via Inverse Perspective Mapping (IPM).
+   * Continuous steering target formulation based on **Stanley Cross-Track Error and Pure Pursuit Lookahead** ($\delta \in [-30.0^\circ, +30.0^\circ]$), replacing coarse discrete classification.
+3. **Hardware Acceleration and INT8 PTQ:**
    * Dynamic batch ONNX export with constant folding and graph simplification (`onnxsim`).
-   * TensorRT INT8 quantization via `IInt8EntropyCalibrator2` consuming real track calibration frames.
+   * TensorRT INT8 quantization via `IInt8EntropyCalibrator2` calibrated with real track recorded frames.
 4. **Online Temporal Post-Processing (`MicroViTSmoothed`):**
-   * Hybrid stateful pipeline filtering single-frame lighting glitches and reducing servo jitter by **-75.0%** (1.95° vs. 7.82° in DAVE-2).
+   * Stateful filtering pipeline neutralizing single-frame lighting glitches and reducing servo jitter by **75.0%** (1.95° vs. 7.82° in DAVE-2).
 5. **Data Drift Auditing with Evidently AI:**
-   * Automated statistical validation comparing nominal lighting vs. cast shadows and underexposure.
-6. **Production Microservice & Multi-Stage Containerization:**
-   * Asynchronous **FastAPI** inference service supporting multipart file uploads, base64 payloads, dynamic model switching, and health metrics.
+   * Automated statistical validation comparing nominal track conditions against cast shadows and underexposure.
+6. **Production Microservice and Multi-Stage Containerization:**
+   * Asynchronous **FastAPI** inference service supporting multipart file uploads, base64 payloads, dynamic model switching, and real-time health metrics.
    * Multi-stage minimal **Docker** container (< 250 MB) running as an unprivileged non-root user.
 
 ---
 
-## 🏛️ System Architecture
+## System Architecture
 
 ```mermaid
 flowchart TD
     subgraph INGESTION["1. Data Pipeline & Kinematics"]
-        V[17 Raw MP4 Videos<br>ENSICAEN Track] -->|10.0 FPS Sampler| F[3,433 Canonical Frames<br>200x66x3 RGB]
-        F --> IPM[Inverse Perspective Mapping<br>Bird's Eye View 400x400]
-        IPM --> CTR[Stanley + Pure Pursuit<br>Centerline Extraction]
-        CTR --> LBL[Continuous Labels<br>delta_next_step in -30 deg, +30 deg]
+        V["17 Raw MP4 Videos<br/>ENSICAEN Track"] -->|10.0 FPS Sampler| F["3,433 Canonical Frames<br/>200x66x3 RGB"]
+        F --> IPM["Inverse Perspective Mapping<br/>Bird's Eye View 400x400"]
+        IPM --> CTR["Stanley + Pure Pursuit<br/>Centerline Extraction"]
+        CTR --> LBL["Continuous Labels<br/>Steering Angle in [-30 deg, +30 deg]"]
     end
 
     subgraph MODELS["2. Deep Learning Architectures"]
-        LBL --> TRN[Training Pipeline<br>Huber Loss + Cosine LR]
-        TRN --> M1["NVIDIA DAVE-2<br>(1,595,511 params)"]
-        TRN --> M2["MicroViT Proposed<br>(359,841 params)"]
-        M2 --> M3["MicroViTSmoothed<br>(Median K=3 + EMA alpha=0.65)"]
+        LBL --> TRN["Training Pipeline<br/>Huber Loss + Cosine LR"]
+        TRN --> M1["NVIDIA DAVE-2 Baseline<br/>(1,595,511 params)"]
+        TRN --> M2["MicroViT Proposed<br/>(359,841 params)"]
+        M2 --> M3["MicroViTSmoothed<br/>(Median K=3 + EMA alpha=0.65)"]
     end
 
     subgraph OPT["3. Edge Optimization"]
-        M1 & M2 --> ONX[ONNX Dynamic Exporter<br>onnxsim + shape verification]
-        ONX --> TRT[TensorRT INT8 PTQ<br>IInt8EntropyCalibrator2]
-        TRT --> STRAT[Inference Strategy Pattern<br>PyTorch / ONNX / TensorRT]
+        M1 --> ONX["ONNX Dynamic Exporter<br/>onnxsim + shape verification"]
+        M2 --> ONX
+        ONX --> TRT["TensorRT INT8 PTQ<br/>IInt8EntropyCalibrator2"]
+        TRT --> STRAT["Inference Strategy Pattern<br/>PyTorch / ONNX / TensorRT"]
     end
 
     subgraph SERVING["4. Production Serving & MLOps"]
-        STRAT --> API[FastAPI Async Microservice<br>POST /steer | POST /steer/base64]
-        API --> DOCKER[Multi-Stage Docker Container<br>python:3.12-slim-bookworm]
-        F & STRAT --> EV[Evidently AI Drift Report<br>Nominal vs Cast Shadow]
-        TRN --> MLF[MLflow Tracking Dashboard]
+        STRAT --> API["FastAPI Async Microservice<br/>POST /steer and /steer/base64"]
+        API --> DOCKER["Multi-Stage Docker Container<br/>python:3.12-slim-bookworm"]
+        F --> EV["Evidently AI Drift Report<br/>Nominal vs Cast Shadow"]
+        STRAT --> EV
+        TRN --> MLF["MLflow Tracking Dashboard"]
     end
 ```
 
 ---
 
-## 🔬 MicroViT Neural Architecture
+## MicroViT Neural Architecture
 
 ```mermaid
 flowchart LR
-    IN["Input Frame<br>(B, 3, 66, 200)"] --> STEM1["Conv2D 3x3, s=2<br>BatchNorm + GELU<br>(B, 32, 33, 100)"]
-    STEM1 --> STEM2["Conv2D 3x3, s=2<br>BatchNorm + GELU<br>(B, 64, 16, 50)"]
-    STEM2 --> PATCH["Patch Embedding 2x2<br>Linear Projection d=128<br>(B, 200 tokens, 128)"]
-    PATCH --> POS["Learnable 1D<br>Positional Embedding"]
-    POS --> BLK1["Transformer Block 1<br>LayerNorm + 4-Head Self-Attention<br>MLP Dim = 256 + Residuals"]
-    BLK1 --> BLK2["Transformer Block 2<br>LayerNorm + 4-Head Self-Attention<br>MLP Dim = 256 + Residuals"]
-    BLK2 --> GAP["Global Average Pooling<br>(B, 128)"]
-    GAP --> HEAD["Linear Regressor<br>128 -> 32 -> 1"]
-    HEAD --> OUT["Normalized Steer<br>y_hat in [-1.0, 1.0] -> [-30 deg, +30 deg]"]
-    OUT --> SMOOTH["Online Median K=3<br>+ EMA alpha=0.65"]
-    SMOOTH --> CTRL["PWM Servo Angle<br>(Smooth Trajectory)"]
+    IN["Input Frame<br/>(B, 3, 66, 200)"] --> STEM1["Conv2D 3x3, s=2<br/>BatchNorm + GELU<br/>(B, 32, 33, 100)"]
+    STEM1 --> STEM2["Conv2D 3x3, s=2<br/>BatchNorm + GELU<br/>(B, 64, 16, 50)"]
+    STEM2 --> PATCH["Patch Embedding 2x2<br/>Linear Projection d=128<br/>(B, 200 tokens, 128)"]
+    PATCH --> POS["Learnable 1D<br/>Positional Embedding"]
+    POS --> BLK1["Transformer Block 1<br/>LayerNorm + 4-Head Attention<br/>MLP Dim = 256 + Residuals"]
+    BLK1 --> BLK2["Transformer Block 2<br/>LayerNorm + 4-Head Attention<br/>MLP Dim = 256 + Residuals"]
+    BLK2 --> GAP["Global Average Pooling<br/>(B, 128)"]
+    GAP --> HEAD["Linear Regressor<br/>128 &rarr; 32 &rarr; 1"]
+    HEAD --> OUT["Normalized Steering Output<br/>Range: -30 deg to +30 deg"]
+    OUT --> SMOOTH["Online Median Filter (K=3)<br/>+ EMA Filter (alpha=0.65)"]
+    SMOOTH --> CTRL["PWM Servo Angle<br/>(Actuation Command)"]
 ```
 
 ---
 
-## 📊 Comprehensive Benchmark & Empirical Results
+## Benchmark and Empirical Results
 
 The network architectures were evaluated on identical test splits and execution platforms:
 
@@ -113,14 +115,14 @@ The network architectures were evaluated on identical test splits and execution 
 | **Throughput (FPS)** | 482.9 FPS | 436.7 FPS | 437.0 FPS |
 | **Nominal Test MAE** | 6.63° | 9.55° (*5.66° @ 50ep*) | 10.95° (*4.91° seq*) |
 | **Drift Test MAE (Shadows)** | 11.73° (*+76.9%*) | 11.56° (*+21.1%*) | **11.85° (+8.2%)** |
-| **Steering Jitter ($\sigma_{\Delta \delta}$)** | 7.82° | 6.88° | **1.95° (-75.0%)** |
+| **Steering Jitter (σ)** | 7.82° | 6.88° | **1.95° (-75.0%)** |
 | **Track Off-Course / Crashes** | 4 / 17 runs | 0 / 17 runs | **0 / 17 runs** |
 
 > **Key Takeaway:** Under adverse cast shadows and underexposure (Evidently AI Data Drift simulation), convolutional architectures experience severe feature degradation (+76.9% error growth). MicroViT's global self-attention limits degradation to +21.1%, while `MicroViTSmoothed` achieves **+8.2% stability** and reduces steering servo jitter by **75.0%**, preventing high-frequency oscillations and track exits.
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```text
 nxpcup/
@@ -168,7 +170,7 @@ nxpcup/
 
 ---
 
-## ⚡ Quickstart Guide
+## Quickstart Guide
 
 ### 1. Environment Installation
 This project leverages [uv](https://github.com/astral-sh/uv) for deterministic dependency management:
@@ -182,7 +184,7 @@ cd nxpcup
 make install
 ```
 
-### 2. Code Quality & Automated Tests
+### 2. Code Quality and Automated Tests
 Ensure all automated unit tests, strict typechecking, and linting pass:
 
 ```bash
@@ -197,7 +199,7 @@ make format
 make typecheck
 ```
 
-### 3. Model Training & MLflow Tracking
+### 3. Model Training and MLflow Tracking
 Train the steering architectures with Huber Loss and Cosine Annealing:
 
 ```bash
@@ -208,7 +210,7 @@ make train-microvit
 make train-dave2
 ```
 
-### 4. Edge Optimization (ONNX & TensorRT)
+### 4. Edge Optimization (ONNX and TensorRT)
 Export models to optimized ONNX computational graphs with batch dynamism:
 
 ```bash
@@ -229,7 +231,7 @@ make drift
 
 ---
 
-## 🌐 Real-Time Steering API (FastAPI)
+## Real-Time Steering API (FastAPI)
 
 Launch the asynchronous steering service:
 
@@ -288,7 +290,7 @@ curl -X POST "http://127.0.0.1:8000/reset"
 
 ---
 
-## 🐳 Docker Deployment
+## Docker Deployment
 
 Build and run the lightweight production container:
 
@@ -309,7 +311,7 @@ Access the services:
 
 ---
 
-## 👤 Author & Acknowledgments
+## Author and Acknowledgments
 
 * **Lead Engineer / Author:** Igor Braga Palhano
 * **Institution:** ENSICAEN (École Nationale Supérieure d'Ingénieurs de Caen, France) & Universidade Federal do Ceará (UFC, Brazil)
@@ -317,6 +319,6 @@ Access the services:
 
 ---
 
-## 📜 License
+## License
 
 This project is licensed under the [MIT License](LICENSE).
